@@ -248,31 +248,7 @@
   @media (max-width:900px){ .features{grid-template-columns:1fr 1fr;} }
   @media (max-width:560px){ .features{grid-template-columns:1fr;} }
 
-  /* ================= PACOTES ================= */
-  .pacotes-head{max-width:60ch; margin-bottom:50px;}
-  .pacotes-head h2{font-size:2.1rem; margin-top:10px;}
-  .pacotes{display:grid; grid-template-columns:repeat(3,1fr); gap:26px;}
-  .pacote{
-    background:var(--ivory-soft); border:1px solid rgba(30,58,43,.18);
-    padding:36px 30px; display:flex; flex-direction:column;
-    transition:border-color .25s, transform .25s;
-  }
-  .pacote:hover{border-color:var(--wine); transform:translateY(-4px);}
-  .pacote .tag{font-family:var(--font-mono); font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; color:var(--wine);}
-  .pacote h3{font-size:1.4rem; margin:12px 0 6px;}
-  .pacote .preco{font-family:var(--font-mono); color:var(--green-deep); font-size:.95rem; margin-bottom:18px;}
-  .pacote ul{margin-bottom:26px; flex-grow:1;}
-  .pacote li{
-    font-size:.92rem; color:var(--ink-soft); padding:8px 0; border-top:1px solid rgba(30,58,43,.12);
-    display:flex; gap:10px;
-  }
-  .pacote li::before{content:"✦"; color:var(--gold); flex-shrink:0;}
-  .pacote.destaque{background:var(--green-deep); border-color:var(--green-deep);}
-  .pacote.destaque .tag{color:var(--gold-light);}
-  .pacote.destaque h3, .pacote.destaque .preco{color:var(--ivory-soft);}
-  .pacote.destaque li{color:rgba(245,240,225,.82); border-top-color:rgba(245,240,225,.2);}
-
-  @media (max-width:900px){ .pacotes{grid-template-columns:1fr;} }
+  /* ================= (pacotes removidos) ================= */
 
   /* ================= GALERIA ================= */
   .galeria-head{display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:40px; gap:20px; flex-wrap:wrap;}
@@ -440,7 +416,6 @@
     <a href="#topo" class="logo">Radiance <span>Recepções e Eventos</span></a>
     <ul class="nav-links" id="navLinks">
       <li><a href="#sobre">Espaço</a></li>
-      <li><a href="#pacotes">Pacotes</a></li>
       <li><a href="#galeria">Galeria</a></li>
       <li><a href="#depoimentos">Depoimentos</a></li>
       <li><a href="#faq">Perguntas</a></li>
@@ -479,7 +454,7 @@
             <p class="hero-sub">Um casarão com jardim interno e salão climatizado para casamentos, debutantes, aniversários e eventos corporativos — com estrutura pronta para até 100 convidados.</p>
             <div class="hero-actions">
               <a href="#reserva" class="btn btn-primary">Reservar minha data</a>
-              <a href="#pacotes" class="btn btn-ghost">Conhecer pacotes</a>
+              <a href="#sobre" class="btn btn-ghost">Conhecer o espaço</a>
             </div>
             <div class="hero-facts">
               <div><b>100</b>convidados</div>
@@ -562,60 +537,6 @@
     </div>
   </section>
 
-  <!-- ================= PACOTES ================= -->
-  <section id="pacotes">
-    <div class="wrap">
-      <div class="pacotes-head reveal">
-        <span class="eyebrow">Pacotes</span>
-        <h2>Escolha o formato do seu evento</h2>
-      </div>
-      <div class="pacotes">
-        <div class="pacote reveal">
-          <span class="tag">Aniversários &amp; Chás</span>
-          <h3>Pacote Jasmim</h3>
-          <div class="preco">a partir de R$ 3.900</div>
-          <ul>
-            <li>Até 6 horas de uso do espaço</li>
-            <li>Salão principal + área kids</li>
-            <li>Mesa e cadeiras para 80 convidados</li>
-            <li>Som ambiente e microfone</li>
-            <li>Equipe de limpeza e apoio</li>
-          </ul>
-          <a href="#reserva" class="btn btn-ghost">Reservar este pacote</a>
-        </div>
-
-        <div class="pacote destaque reveal">
-          <span class="tag">Casamentos &amp; Debutantes</span>
-          <h3>Pacote Bougainville</h3>
-          <div class="preco">a partir de R$ 8.500</div>
-          <ul>
-            <li>Até 10 horas de uso do espaço</li>
-            <li>Casa inteira: salão, jardim e varanda</li>
-            <li>Mesa e cadeiras para 220 convidados</li>
-            <li>Som, iluminação cênica e telão</li>
-            <li>Camarim para noivos ou aniversariante</li>
-            <li>Coordenação de cerimonial no local</li>
-          </ul>
-          <a href="#reserva" class="btn btn-gold">Reservar este pacote</a>
-        </div>
-
-        <div class="pacote reveal">
-          <span class="tag">Corporativo</span>
-          <h3>Pacote Alameda</h3>
-          <div class="preco">a partir de R$ 4.700</div>
-          <ul>
-            <li>Até 8 horas de uso do espaço</li>
-            <li>Salão principal com formato auditório</li>
-            <li>Projetor, telão e sistema de som</li>
-            <li>Wi-Fi dedicado para o evento</li>
-            <li>Coffee break sob consulta</li>
-          </ul>
-          <a href="#reserva" class="btn btn-ghost">Reservar este pacote</a>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <div class="divider">
     <svg viewBox="0 0 220 22"><path d="M0 11 Q 55 22 110 11 T 220 11" stroke="#7A2E3A" stroke-width="1.4" fill="none"/></svg>
   </div>
@@ -689,8 +610,11 @@
 
           <div class="field-row">
             <div class="field">
-              <label for="data">Data do evento</label>
-              <input type="date" id="data" name="data" required>
+              <label for="duracao">Duração do evento</label>
+              <select id="duracao" name="duracao" required>
+                <option value="unica" selected>Um dia</option>
+                <option value="multipla">Mais de um dia</option>
+              </select>
             </div>
             <div class="field">
               <label for="tipo">Tipo de evento</label>
@@ -707,16 +631,36 @@
 
           <div class="field-row">
             <div class="field">
+              <label for="dataInicio">Data de início</label>
+              <input type="date" id="dataInicio" name="dataInicio" required>
+            </div>
+            <div class="field" id="dataFinalField" style="display:none;">
+              <label for="dataFinal">Data final</label>
+              <input type="date" id="dataFinal" name="dataFinal">
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
               <label for="convidados">Número de convidados</label>
               <input type="number" id="convidados" name="convidados" min="1" max="300" placeholder="Ex: 120" required>
             </div>
-            <div class="field">
-              <label for="turno">Turno preferido</label>
-              <select id="turno" name="turno">
+            <div class="field" id="turnoField">
+              <label for="turno">Turno</label>
+              <select id="turno" name="turno" required>
                 <option value="Diurno">Diurno</option>
                 <option value="Noturno">Noturno</option>
               </select>
             </div>
+          </div>
+
+          <div class="field">
+            <label for="piscina">Acesso à piscina</label>
+            <select id="piscina" name="piscina" disabled>
+              <option value="nao" selected>Sem acesso à piscina</option>
+              <option value="sim">Com acesso à piscina</option>
+            </select>
+            <span class="field-error show" style="color:var(--ink-soft);">Em breve — a área da piscina ainda está em construção.</span>
           </div>
 
           <div class="field">
@@ -734,8 +678,10 @@
         <h3>Sua reserva</h3>
         <div class="preview-line"><span>Nome</span><span id="pvNome">—</span></div>
         <div class="preview-line"><span>Evento</span><span id="pvTipo">—</span></div>
-        <div class="preview-line"><span>Data</span><span id="pvData">—</span></div>
+        <div class="preview-line"><span>Data início</span><span id="pvDataInicio">—</span></div>
+        <div class="preview-line"><span>Data final</span><span id="pvDataFinal">—</span></div>
         <div class="preview-line"><span>Turno</span><span id="pvTurno">Diurno</span></div>
+        <div class="preview-line"><span>Piscina</span><span id="pvPiscina">Sem acesso</span></div>
         <div class="preview-line"><span>Convidados</span><span id="pvConvidados">—</span></div>
         <div class="preview-line"><span>WhatsApp</span><span id="pvWhats">—</span></div>
       </div>
@@ -772,7 +718,7 @@
         </div>
         <div class="faq-item">
           <button class="faq-q">Qual o valor do sinal para reservar a data? <span class="plus">+</span></button>
-          <div class="faq-a"><p>O sinal corresponde a 30% do valor do pacote escolhido e garante a data exclusiva para o seu evento.</p></div>
+          <div class="faq-a"><p>O sinal corresponde a 30% do valor total da reserva e garante a data exclusiva para o seu evento.</p></div>
         </div>
         <div class="faq-item">
           <button class="faq-q">Posso remarcar a data em caso de imprevisto? <span class="plus">+</span></button>
@@ -826,7 +772,6 @@
       <div class="footer-logo">Radiance Recepções e Eventos</div>
       <ul class="footer-nav" style="display:flex;">
         <li><a href="#sobre">Espaço</a></li>
-        <li><a href="#pacotes">Pacotes</a></li>
         <li><a href="#galeria">Galeria</a></li>
         <li><a href="#faq">Perguntas</a></li>
         <li><a href="#contato">Contato</a></li>
@@ -924,13 +869,37 @@
   });
   whatsappInput.addEventListener('blur', validatePhoneField);
 
+  // ---------- Duração: mostra/esconde data final ----------
+  const duracaoSelect = document.getElementById('duracao');
+  const dataFinalField = document.getElementById('dataFinalField');
+  const dataInicioInput = document.getElementById('dataInicio');
+  const dataFinalInput = document.getElementById('dataFinal');
+  const turnoField = document.getElementById('turnoField');
+  const turnoSelect = document.getElementById('turno');
+
+  function toggleDataFinal() {
+    const multipla = duracaoSelect.value === 'multipla';
+    dataFinalField.style.display = multipla ? 'block' : 'none';
+    dataFinalInput.required = multipla;
+    if (!multipla) dataFinalInput.value = '';
+
+    // Com mais de um dia, o evento ocupa diurno e noturno — turno não se aplica.
+    turnoField.style.display = multipla ? 'none' : 'block';
+    turnoSelect.required = !multipla;
+    if (multipla) turnoSelect.value = 'Diurno';
+  }
+  duracaoSelect.addEventListener('change', toggleDataFinal);
+  toggleDataFinal();
+
   // ---------- Booking form: live preview ----------
   const form = document.getElementById('bookingForm');
   const pv = {
     nome: document.getElementById('pvNome'),
     tipo: document.getElementById('pvTipo'),
-    data: document.getElementById('pvData'),
+    dataInicio: document.getElementById('pvDataInicio'),
+    dataFinal: document.getElementById('pvDataFinal'),
     turno: document.getElementById('pvTurno'),
+    piscina: document.getElementById('pvPiscina'),
     convidados: document.getElementById('pvConvidados'),
     whats: document.getElementById('pvWhats'),
   };
@@ -943,18 +912,24 @@
 
   function updatePreview() {
     const data = new FormData(form);
+    const multipla = data.get('duracao') === 'multipla';
     pv.nome.textContent = data.get('nome') || '—';
     pv.tipo.textContent = data.get('tipo') || '—';
-    pv.data.textContent = formatDate(data.get('data'));
-    pv.turno.textContent = data.get('turno') || 'Diurno';
+    pv.dataInicio.textContent = formatDate(data.get('dataInicio'));
+    pv.dataFinal.textContent = multipla ? formatDate(data.get('dataFinal')) : formatDate(data.get('dataInicio'));
+    pv.turno.textContent = multipla ? 'Não se aplica' : (data.get('turno') || 'Diurno');
+    pv.piscina.textContent = data.get('piscina') === 'sim' ? 'Com acesso' : 'Sem acesso';
     pv.convidados.textContent = data.get('convidados') ? data.get('convidados') + ' pessoas' : '—';
     pv.whats.textContent = data.get('whatsapp') || '—';
   }
   form.addEventListener('input', updatePreview);
   form.addEventListener('change', updatePreview);
 
-  // ---------- Booking form: submit (front-end only, sem backend) ----------
-  form.addEventListener('submit', function (e) {
+  // ---------- Booking form: submit ----------
+  // O valor total NÃO é calculado aqui. O front-end apenas envia os dados
+  // da reserva (datas, turno, piscina, convidados etc.) para o back-end,
+  // que calcula o valor_total e grava o registro completo no banco de dados.
+  form.addEventListener('submit', async function (e) {
     e.preventDefault();
 
     if (!validatePhoneField()) {
@@ -963,14 +938,44 @@
       return;
     }
 
+    const data = new FormData(form);
+    const multipla = data.get('duracao') === 'multipla';
+
+    const payload = {
+      nome: data.get('nome'),
+      whatsapp: data.get('whatsapp'),
+      tipo_evento: data.get('tipo'),
+      data_inicio_evento: data.get('dataInicio'),
+      data_final_evento: multipla ? data.get('dataFinal') : data.get('dataInicio'),
+      turno: multipla ? null : data.get('turno'),
+      acesso_piscina: data.get('piscina') === 'sim',
+      num_convidados: Number(data.get('convidados')),
+      mensagem: data.get('mensagem') || null,
+    };
+
     const msg = document.getElementById('formMsg');
-    msg.classList.add('show');
-    msg.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    // Aqui entraria a integração real com backend / e-mail / WhatsApp API.
-    form.reset();
-    whatsappInput.classList.remove('valid', 'invalid');
-    whatsappError.classList.remove('show');
-    setTimeout(updatePreview, 0);
+
+    try {
+      // Endpoint do back-end: recebe os dados acima, calcula o valor_total
+      // (com base em turno + acesso_piscina + nº de dias) e grava em `aluguel`.
+      const res = await fetch('/api/reservas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error('Falha ao enviar a reserva');
+
+      msg.classList.add('show');
+      msg.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      form.reset();
+      toggleDataFinal();
+      whatsappInput.classList.remove('valid', 'invalid');
+      whatsappError.classList.remove('show');
+      setTimeout(updatePreview, 0);
+    } catch (err) {
+      msg.textContent = 'Não foi possível enviar sua reserva agora. Tente novamente em instantes ou fale pelo WhatsApp.';
+      msg.classList.add('show');
+    }
   });
 </script>
 
