@@ -10,7 +10,7 @@ if python -c "import socket,sys; s=socket.socket(); sys.exit(0 if s.connect_ex((
 fi
 
 echo "==> Esperando o banco de dados ficar pronto..."
-python - <<'PY'
+if ! python - <<'PY'
 import sys, time, pymysql
 from dotenv import dotenv_values
 c = dotenv_values(".env")
@@ -22,9 +22,17 @@ for tentativa in range(60):          # até ~2 minutos (na 1ª vez o MySQL ainda
         sys.exit(0)
     except pymysql.err.OperationalError:
         time.sleep(2)
-print("    O banco não respondeu. Veja docs/INSTALACAO.md → Problemas comuns.")
+print("    O banco não respondeu.")
 sys.exit(1)
 PY
+then
+  echo ""
+  echo "O site NÃO foi iniciado, porque sem o banco o cadastro, o login e o calendário não funcionam."
+  echo "Se a pasta .devcontainer foi adicionada depois de criar o Codespace, reconstrua:"
+  echo "  Ctrl+Shift+P → Codespaces: Rebuild Container"
+  echo "Se acabou de criar o Codespace, espere 1 minuto e rode de novo: bash .devcontainer/iniciar.sh"
+  exit 1
+fi
 
 echo ""
 echo "==> Iniciando o site em http://localhost:5000"
