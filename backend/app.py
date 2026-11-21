@@ -3,6 +3,8 @@
 Serve as páginas do site (pasta ../site) e a API em /api/*.
 Para rodar em desenvolvimento:  python app.py   (detalhes no README.md)
 """
+import os
+
 import pymysql
 from flask import Flask, abort, jsonify, request, send_from_directory
 
@@ -89,4 +91,6 @@ def create_app(config=Config):
 app = create_app()
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    # FLASK_DEBUG=1 (padrão): recarrega sozinho ao editar o código e mostra
+    # erros detalhados. Use FLASK_DEBUG=0 antes de deixar o site público.
+    app.run(debug=os.getenv("FLASK_DEBUG", "1") == "1", port=5000)

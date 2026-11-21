@@ -1,0 +1,5 @@
+Flask>=3.0,<4
+PyMySQL>=1.1,<2
+cryptography>=42      # necessário para o PyMySQL autenticar no MySQL 8
+python-dotenv>=1.0,<2
+gunicorn>=22 ; sys_platform != "win32"   # servidor de produção (Linux)
