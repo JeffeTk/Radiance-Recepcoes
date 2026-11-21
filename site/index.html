@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Radiance Recepções e Eventos — Casa de Festas</title>
+<meta name="description" content="Radiance Recepções e Eventos, casa de festas em João Pessoa/PB para casamentos, debutantes, aniversários e eventos corporativos. Reserve sua data.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<script>
+  // aplica o tema salvo antes de desenhar a página (evita "piscar" claro → escuro)
+  try { if (localStorage.getItem('radianceTheme') === 'dark') document.body.classList.add('dark-mode'); } catch (e) {}
+</script>
+
+<header>
+  <nav class="nav">
+    <a href="#topo" class="logo">Radiance <span>Recepções e Eventos</span></a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#sobre">Espaço</a></li>
+      <li><a href="#galeria">Galeria</a></li>
+      <li><a href="#depoimentos">Depoimentos</a></li>
+      <li><a href="#faq">Perguntas</a></li>
+      <li><a href="#contato">Contato</a></li>
+      <li><a href="reserva.html">Reservar</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="reserva.html" class="btn btn-ghost">Ver disponibilidade</a>
+      <div class="account">
+        <button class="account-btn" id="accountBtn" type="button" aria-haspopup="true" aria-expanded="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>
+          <span class="account-label" id="accountLabel">Entrar</span>
+        </button>
+        <div class="account-menu" id="accountMenu" hidden>
+          <span class="account-email" id="accountEmail"></span>
+          <a href="reserva.html" id="menuReserva">Nova reserva</a>
+          <button type="button" id="logoutBtn">Sair</button>
+        </div>
+      </div>
+      <button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false" aria-label="Ativar modo escuro">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2 12h2M20 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>
+      </button>
+      <button class="burger" id="burgerBtn" aria-label="Abrir menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+</header>
+
+<main id="topo">
+
+  <!-- ================= HERO ================= -->
+  <section class="hero">
+    <svg class="hero-vine" viewBox="0 0 200 600" xmlns="http://www.w3.org/2000/svg">
+      <path d="M170 0 C130 60 200 120 150 180 C100 240 180 300 130 360 C90 410 160 470 120 540 C100 570 140 590 120 600"
+            class="vine-stem"/>
+      <circle class="vine-dot gold" cx="150" cy="60" r="7"/>
+      <circle class="vine-dot wine" cx="120" cy="150" r="6"/>
+      <circle class="vine-dot wine" cx="165" cy="230" r="8"/>
+      <circle class="vine-dot gold" cx="105" cy="320" r="6"/>
+      <circle class="vine-dot wine" cx="150" cy="400" r="7"/>
+      <circle class="vine-dot gold" cx="115" cy="490" r="6"/>
+    </svg>
+
+    <div class="wrap hero-grid">
+      <div class="reveal is-visible">
+        <div class="invite-card">
+          <div class="invite-card-inner">
+            <span class="eyebrow">Radiance Recepções e Eventos · Casa de Festas</span>
+            <h1>O convite começa<br><em>antes da festa.</em></h1>
+            <p class="hero-sub">Um casarão com jardim interno e salão climatizado para casamentos, debutantes, aniversários e eventos corporativos — com estrutura pronta para até 100 convidados.</p>
+            <div class="hero-actions">
+              <a href="reserva.html" class="btn btn-primary">Reservar minha data</a>
+              <a href="#sobre" class="btn btn-ghost">Conhecer o espaço</a>
+            </div>
+            <div class="hero-facts">
+              <div><b>100</b>convidados</div>
+              <div><b>20m²</b>de área total</div>
+              <div><b>2</b>ambientes integrados</div>
+              <div><b>1</b>ano de casa</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-visual reveal is-visible">
+        <div class="hero-visual-tag">Jardim interno</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider">
+    <svg viewBox="0 0 220 22"><path d="M0 11 Q 55 0 110 11 T 220 11" class="divider-line gold"/></svg>
+  </div>
+
+  <!-- ================= SOBRE ================= -->
+  <section id="sobre" class="sobre">
+    <div class="wrap sobre-grid">
+      <div class="reveal">
+        <span class="eyebrow">O espaço</span>
+        <h2>Um salão pensado para receber, não só para caber gente.</h2>
+        <p class="lead">A Radiance Recepções e Eventos reúne dois ambientes integrados — salão principal climatizado e jardim interno — além de uma área gourmet separada, tudo em um único terreno, sem precisar dividir seus convidados entre ambientes distantes.</p>
+        <p class="lead">Trabalhamos com uma reserva por data: sua festa é a única acontecendo na casa naquele dia.</p>
+      </div>
+      <div class="ficha reveal">
+        <div class="ficha-row"><span>Capacidade máxima</span><span>100 convidados</span></div>
+        <div class="ficha-row"><span>Área total</span><span>20 m²</span></div>
+        <div class="ficha-row"><span>Ambientes integrados</span><span>2 (salão e jardim)</span></div>
+        <div class="ficha-row"><span>Vagas de estacionamento</span><span>4 vagas</span></div>
+        <div class="ficha-row"><span>Cozinha para buffet</span><span>Equipada</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ESTRUTURA ================= -->
+  <section class="estrutura">
+    <div class="wrap">
+      <div class="estrutura-head reveal">
+        <span class="eyebrow">Estrutura incluída</span>
+        <h2>O que já vem com o espaço</h2>
+      </div>
+      <div class="features">
+        <div class="feature reveal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 20v-2a4 4 0 0 1 4-4h2a4 4 0 0 1 4 4v2"/><circle cx="9" cy="7" r="3"/><path d="M16 10a3 3 0 1 0 0-6"/><path d="M18 20v-2a3.5 3.5 0 0 0-2-3.2"/></svg>
+          <h4>Ar-condicionado central</h4>
+          <p>Climatização em todo o salão principal.</p>
+        </div>
+        <div class="feature reveal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="10" width="18" height="8" rx="1.5"/><path d="M5 10 6.5 5h11L19 10"/><circle cx="7.5" cy="18" r="1.5"/><circle cx="16.5" cy="18" r="1.5"/></svg>
+          <h4>4 vagas de estacionamento</h4>
+          <p>Pátio interno.</p>
+        </div>
+        <div class="feature reveal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="1"/><path d="M3 9h18"/><path d="M8 4v5"/></svg>
+          <h4>Cozinha equipada</h4>
+          <p>Estrutura completa para buffet próprio ou fornecedor externo.</p>
+        </div>
+        <div class="feature reveal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="9" y="3" width="6" height="18" rx="2"/><circle cx="12" cy="7" r="1"/><circle cx="12" cy="17" r="1"/></svg>
+          <h4>Som e iluminação de festa</h4>
+          <p>Caixas, mesa de som e iluminação cênica já instaladas.</p>
+        </div>
+        <div class="feature reveal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.5-9.5 9-9.5 9z"/></svg>
+          <h4>Jardim interno</h4>
+          <p>Área verde coberta.</p>
+        </div>
+        <div class="feature reveal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 21c4-2 6 2 10 0"/><rect x="6" y="4" width="12" height="12" rx="1"/><path d="M9 8h6M9 11h4"/></svg>
+          <h4>Área gourmet separada</h4>
+          <p>Um cantinho à parte para churrasco, drinks e petiscos — sem disputar espaço com a pista e as mesas.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider">
+    <svg viewBox="0 0 220 22"><path d="M0 11 Q 55 22 110 11 T 220 11" class="divider-line wine"/></svg>
+  </div>
+
+  <!-- ================= GALERIA ================= -->
+  <section id="galeria">
+    <div class="wrap">
+      <div class="galeria-head reveal">
+        <div>
+          <span class="eyebrow">Galeria</span>
+          <h2>Os dois ambientes da casa</h2>
+        </div>
+        <p class="galeria-note">Fotos reais do espaço são enviadas no orçamento personalizado — aqui, uma prévia de cada ambiente.</p>
+      </div>
+      <div class="galeria">
+        <div class="galeria-item g1 reveal"><span>Salão principal</span></div>
+        <div class="galeria-item g2 reveal"><span>Jardim interno</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= COMO RESERVAR ================= -->
+  <section id="como-funciona" class="section-alt">
+    <div class="wrap">
+      <span class="eyebrow reveal">Como funciona</span>
+      <h2 class="reveal section-title">Três passos até a data confirmada</h2>
+      <div class="passos">
+        <div class="passo reveal">
+          <span class="num">01</span>
+          <h4>Verifique a data</h4>
+          <p>Escolha a data no calendário da página de reserva e conte qual é o evento.</p>
+        </div>
+        <div class="passo reveal">
+          <span class="num">02</span>
+          <h4>Visita e orçamento</h4>
+          <p>Nossa equipe confirma a disponibilidade e agenda uma visita ao espaço.</p>
+        </div>
+        <div class="passo reveal">
+          <span class="num">03</span>
+          <h4>Contrato e sinal</h4>
+          <p>Data reservada com contrato assinado e pagamento do sinal inicial.</p>
+        </div>
+      </div>
+      <div class="passos-cta reveal"><a href="reserva.html" class="btn btn-primary">Verificar disponibilidade</a></div>
+    </div>
+  </section>
+
+  <!-- ================= DEPOIMENTOS ================= -->
+  <section id="depoimentos">
+    <div class="wrap">
+      <span class="eyebrow reveal">Depoimentos</span>
+      <h2 class="reveal section-title">Quem já celebrou na Radiance Recepções e Eventos</h2>
+      <div class="depoimentos">
+        <div class="depoimento reveal">
+          <p class="quote">"O jardim interno resolveu nosso maior medo, que era chuva no dia do casamento. Ficou lindo mesmo fechado."</p>
+          <div class="autor">Camila &amp; Diego — Casamento</div>
+        </div>
+        <div class="depoimento reveal">
+          <p class="quote">"Fizemos a confraternização da empresa lá. Estrutura de som já pronta, não precisamos alugar nada extra."</p>
+          <div class="autor">João P. — Evento corporativo</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FAQ ================= -->
+  <section id="faq" class="section-alt">
+    <div class="wrap">
+      <span class="eyebrow reveal">Perguntas frequentes</span>
+      <h2 class="reveal section-title">Antes de reservar</h2>
+      <div class="faq">
+        <div class="faq-item">
+          <button class="faq-q">É possível levar buffet próprio? <span class="plus">+</span></button>
+          <div class="faq-a"><p>Sim. A cozinha é equipada e pode ser usada por buffet contratado por vocês ou por fornecedores parceiros da casa.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">Qual o valor do sinal para reservar a data? <span class="plus">+</span></button>
+          <div class="faq-a"><p>O sinal corresponde a 30% do valor total e garante a data exclusiva para o seu evento. O restante é pago até 7 dias antes do evento.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">Posso remarcar a data em caso de imprevisto? <span class="plus">+</span></button>
+          <div class="faq-a"><p>Cancelando com pelo menos 7 dias de antecedência, você pode transformar o sinal em crédito válido por 3 meses e usá-lo em uma nova data, conforme a disponibilidade. Com menos de 7 dias, não é possível remarcar.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">E se eu precisar cancelar? <span class="plus">+</span></button>
+          <div class="faq-a"><p>Reservas feitas pelo site ou WhatsApp podem ser canceladas em até 7 dias após a assinatura do contrato, com devolução integral. Depois disso, cancelando com 7 dias ou mais de antecedência, você recebe 50% do sinal de volta ou fica com o sinal inteiro como crédito por 3 meses. Com menos de 7 dias, ou se não comparecer, o sinal fica retido. Todas as regras estão no contrato.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CONTATO ================= -->
+  <section id="contato" class="contato">
+    <div class="wrap contato-grid">
+      <div class="reveal">
+        <span class="eyebrow">Contato</span>
+        <h2>Vamos falar sobre sua data</h2>
+        <ul class="contato-list">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+            <div><strong>Endereço</strong>Rua Aldary Lucena Paiva, 138 — Valentina, João Pessoa/PB · CEP 58064-010</div>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .6 3a2 2 0 0 1-.5 2.1L8 10a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5c1 .3 2 .5 3 .6a2 2 0 0 1 1.7 2z"/></svg>
+            <div><strong>WhatsApp / Telefone</strong>(83) 99391-7889</div>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+            <div><strong>E-mail</strong>radiance.recepcoes@gmail.com</div>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+            <div><strong>Atendimento</strong>Terça a domingo, 9h às 18h</div>
+          </li>
+        </ul>
+        <a href="reserva.html" class="btn btn-gold contato-cta">Solicitar orçamento</a>
+      </div>
+
+      <div class="mapa reveal">
+        <div class="pin">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C7.6 2 4 5.6 4 10c0 6 8 12 8 12s8-6 8-12c0-4.4-3.6-8-8-8zm0 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/></svg>
+          <span>Radiance Recepções e Eventos</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="footer-logo">Radiance Recepções e Eventos</div>
+      <ul class="footer-nav">
+        <li><a href="#sobre">Espaço</a></li>
+        <li><a href="#galeria">Galeria</a></li>
+        <li><a href="#faq">Perguntas</a></li>
+        <li><a href="#contato">Contato</a></li>
+      </ul>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Radiance Recepções e Eventos. Todos os direitos reservados.</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ================= MODAL LOGIN / CADASTRO ================= -->
+<div class="auth-overlay" id="authOverlay" aria-hidden="true">
+  <div class="auth-modal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <button type="button" class="auth-close" id="authClose" aria-label="Fechar">&times;</button>
+    <div class="auth-inner">
+      <span class="eyebrow">Área do cliente</span>
+      <h3 id="authTitle">Entrar na sua conta</h3>
+      <p class="auth-reason" id="authReason"></p>
+
+      <div class="auth-tabs" id="authTabs" role="tablist">
+        <button type="button" class="auth-tab active" role="tab" data-tab="login" aria-selected="true">Entrar</button>
+        <button type="button" class="auth-tab" role="tab" data-tab="cadastro" aria-selected="false">Criar conta</button>
+      </div>
+
+      <div class="auth-alert" id="authAlert" role="alert"></div>
+
+      <!-- ---------- LOGIN ---------- -->
+      <form class="auth-form" id="loginForm" novalidate>
+        <div class="field">
+          <label for="loginEmail">E-mail</label>
+          <input type="email" id="loginEmail" name="email" autocomplete="email" placeholder="voce@email.com" required>
+          <span class="field-error"></span>
+        </div>
+        <div class="field">
+          <label for="loginSenha">Senha</label>
+          <div class="pw-wrap">
+            <input type="password" id="loginSenha" name="senha" autocomplete="current-password" placeholder="Sua senha" required>
+            <button type="button" class="pw-toggle" aria-label="Mostrar senha">Ver</button>
+          </div>
+          <span class="field-error"></span>
+        </div>
+        <button type="submit" class="btn btn-primary">Entrar</button>
+        <p class="auth-switch">Ainda não tem conta? <button type="button" data-goto="cadastro">Criar conta</button></p>
+      </form>
+
+      <!-- ---------- CADASTRO ---------- -->
+      <form class="auth-form" id="cadastroForm" novalidate hidden>
+        <div class="field">
+          <label for="cadNome">Nome completo</label>
+          <input type="text" id="cadNome" name="nome" autocomplete="name" placeholder="Seu nome completo" required>
+          <span class="field-error"></span>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="cadCpf">CPF</label>
+            <input type="text" id="cadCpf" name="cpf" inputmode="numeric" maxlength="14" placeholder="000.000.000-00" required>
+            <span class="field-error"></span>
+          </div>
+          <div class="field">
+            <label for="cadNascimento">Data de nascimento</label>
+            <input type="date" id="cadNascimento" name="data_nascimento" required>
+            <span class="field-error"></span>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="cadTelefone">WhatsApp</label>
+            <input type="tel" id="cadTelefone" name="telefone" inputmode="numeric" maxlength="15" autocomplete="tel" placeholder="(83) 99123-4567" required>
+            <span class="field-error"></span>
+          </div>
+          <div class="field">
+            <label for="cadEmail">E-mail</label>
+            <input type="email" id="cadEmail" name="email" autocomplete="email" placeholder="voce@email.com" required>
+            <span class="field-error"></span>
+          </div>
+        </div>
+        <p class="field-group">Endereço</p>
+        <div class="field-row row-cep">
+          <div class="field">
+            <label for="cadCep">CEP</label>
+            <input type="text" id="cadCep" name="cep" inputmode="numeric" maxlength="9" autocomplete="postal-code" placeholder="00000-000" required>
+            <span class="field-error"></span>
+          </div>
+          <a class="cep-help" href="https://buscacepinter.correios.com.br/app/endereco/index.php" target="_blank" rel="noopener">Não sei meu CEP</a>
+        </div>
+        <p class="field-hint cep-status" id="cepStatus" role="status"></p>
+        <div class="field">
+          <label for="cadRua">Rua</label>
+          <input type="text" id="cadRua" name="rua" autocomplete="address-line1" placeholder="Nome da rua ou avenida" required>
+          <span class="field-error"></span>
+        </div>
+        <div class="field-row row-num">
+          <div class="field">
+            <label for="cadNumero">Número</label>
+            <input type="text" id="cadNumero" name="numero" maxlength="10" placeholder="138 ou S/N" required>
+            <span class="field-error"></span>
+          </div>
+          <div class="field">
+            <label for="cadBairro">Bairro</label>
+            <input type="text" id="cadBairro" name="bairro" placeholder="Seu bairro" required>
+            <span class="field-error"></span>
+          </div>
+        </div>
+        <div class="field-row row-uf">
+          <div class="field">
+            <label for="cadCidade">Cidade</label>
+            <input type="text" id="cadCidade" name="cidade" autocomplete="address-level2" placeholder="Sua cidade" required>
+            <span class="field-error"></span>
+          </div>
+          <div class="field">
+            <label for="cadUf">UF</label>
+            <select id="cadUf" name="uf" autocomplete="address-level1" required>
+              <option value="" selected disabled>UF</option>
+              <option value="AC">AC</option>
+              <option value="AL">AL</option>
+              <option value="AP">AP</option>
+              <option value="AM">AM</option>
+              <option value="BA">BA</option>
+              <option value="CE">CE</option>
+              <option value="DF">DF</option>
+              <option value="ES">ES</option>
+              <option value="GO">GO</option>
+              <option value="MA">MA</option>
+              <option value="MT">MT</option>
+              <option value="MS">MS</option>
+              <option value="MG">MG</option>
+              <option value="PA">PA</option>
+              <option value="PB">PB</option>
+              <option value="PR">PR</option>
+              <option value="PE">PE</option>
+              <option value="PI">PI</option>
+              <option value="RJ">RJ</option>
+              <option value="RN">RN</option>
+              <option value="RS">RS</option>
+              <option value="RO">RO</option>
+              <option value="RR">RR</option>
+              <option value="SC">SC</option>
+              <option value="SP">SP</option>
+              <option value="SE">SE</option>
+              <option value="TO">TO</option>
+            </select>
+            <span class="field-error"></span>
+          </div>
+        </div>
+        <p class="field-group">Acesso</p>
+        <div class="field-row">
+          <div class="field">
+            <label for="cadSenha">Senha</label>
+            <div class="pw-wrap">
+              <input type="password" id="cadSenha" name="senha" autocomplete="new-password" placeholder="Crie uma senha" required>
+              <button type="button" class="pw-toggle" aria-label="Mostrar senha">Ver</button>
+            </div>
+            <span class="field-hint">Mínimo de 8 caracteres, com letras e números.</span>
+            <span class="field-error"></span>
+          </div>
+          <div class="field">
+            <label for="cadSenha2">Confirmar senha</label>
+            <div class="pw-wrap">
+              <input type="password" id="cadSenha2" name="senha2" autocomplete="new-password" placeholder="Repita a senha" required>
+              <button type="button" class="pw-toggle" aria-label="Mostrar senha">Ver</button>
+            </div>
+            <span class="field-error"></span>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Criar conta</button>
+        <p class="auth-switch">Já tem conta? <button type="button" data-goto="login">Entrar</button></p>
+      </form>
+      <!-- ---------- CONFIRMAÇÃO DO E-MAIL ---------- -->
+      <form class="auth-form" id="verifyForm" novalidate hidden>
+        <p class="verify-text">Enviamos um código de 6 números para <strong id="verifyEmail"></strong>. Digite o código abaixo para confirmar seu e-mail e criar a conta.</p>
+        <div class="field">
+          <label for="verifyCode">Código de verificação</label>
+          <input type="text" id="verifyCode" name="codigo" class="code-input" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" required>
+          <span class="field-hint">O código vale por 10 minutos. Confira também a caixa de spam.</span>
+          <span class="field-error"></span>
+        </div>
+        <button type="submit" class="btn btn-primary">Confirmar e criar conta</button>
+        <p class="auth-switch">
+          <button type="button" id="resendCode">Reenviar código</button>
+          <span class="sep">·</span>
+          <button type="button" id="editEmail">Corrigir e-mail</button>
+        </p>
+      </form>
+    </div>
+  </div>
+</div>
+
+<a href="https://wa.me/5583993917889" class="whatsapp-float" aria-label="Falar no WhatsApp" target="_blank" rel="noopener">
+  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8 8 0 1 1 12 20zm4.4-5.9c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1-.2.2-.6.8-.8 1-.1.1-.3.2-.5.1-.2-.1-1-.4-2-1.2-.7-.6-1.2-1.4-1.4-1.6-.1-.2 0-.4.1-.5l.4-.4c.1-.1.2-.3.2-.4.1-.1 0-.3 0-.4-.1-.1-.5-1.3-.7-1.8-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 1.9 0 1.1.8 2.2.9 2.4.1.1 1.6 2.5 3.9 3.4.5.2 1 .4 1.3.5.5.2 1 .1 1.4.1.4-.1 1.4-.6 1.6-1.1.2-.5.2-1 .1-1.1z"/></svg>
+</a>
+
+<script src="assets/main.js" defer></script>
+
+</body>
+</html>
