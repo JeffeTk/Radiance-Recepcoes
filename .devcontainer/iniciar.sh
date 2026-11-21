@@ -22,7 +22,7 @@ for tentativa in range(60):          # até ~2 minutos (na 1ª vez o MySQL ainda
         sys.exit(0)
     except pymysql.err.OperationalError:
         time.sleep(2)
-print("    O banco não respondeu. Veja a seção Codespaces do README (Problemas comuns).")
+print("    O banco não respondeu. Veja docs/INSTALACAO.md → Problemas comuns.")
 sys.exit(1)
 PY
 

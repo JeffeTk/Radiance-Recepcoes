@@ -1,193 +1,172 @@
-# Radiance Recepções e Eventos — site + back-end
+<div align="center">
 
-```
-radiance/
-├── .devcontainer/        configuração do GitHub Codespaces (Python + MySQL prontos)
-├── site/                 páginas (index.html, reserva.html) e assets/ (CSS e JS)
-├── backend/              servidor em Python + Flask (API em /api/* e as páginas do site)
-│   ├── app.py            ponto de entrada
-│   ├── auth.py           cadastro com código por e-mail, login, logout, sessão
-│   ├── reservas.py       datas ocupadas e pedidos de reserva
-│   ├── validacao.py      regras de validação (as mesmas do site)
-│   ├── email_envio.py    envio do código por SMTP
-│   ├── config.py, db.py
-│   ├── requirements.txt
-│   └── .env.example      modelo de configuração
-└── banco/
-    └── radiance_banco.sql   cria o banco (tabelas, regras e trigger)
-```
+# Radiance Recepções e Eventos
 
-O site funciona de três jeitos:
+**Site da casa de festas Radiance, em João Pessoa/PB, com calendário de disponibilidade, pedido de reserva on-line e área do cliente.**
 
-- **Aberto direto do arquivo** (duplo clique no `index.html`): **modo de teste**. Nada vai para o servidor. As contas ficam só na aba do navegador, o código do e-mail aparece na tela e o calendário mostra datas de exemplo.
-- **Aberto pelo servidor** (`http://localhost:5000`): usa o back-end e o banco de verdade.
-- **No GitHub Codespaces:** igual ao anterior, mas na nuvem, sem instalar nada. Veja a seção logo abaixo.
+![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-3-000000?logo=flask&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-8-4479A1?logo=mysql&logoColor=white)
+![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)
+![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)
+![Codespaces](https://img.shields.io/badge/GitHub_Codespaces-pronto-181717?logo=github)
+
+<img src="docs/screenshots/inicio.png" alt="Página inicial do site da Radiance" width="860">
+
+</div>
 
 ---
 
-## Rodar pelo GitHub Codespaces (sem instalar nada)
+## Sobre
 
-O projeto já vem configurado para o **GitHub Codespaces** (pasta `.devcontainer/`). O GitHub cria uma máquina na nuvem com Python e MySQL, monta o banco e inicia o site sozinho. Você usa tudo pelo navegador.
+A Radiance é uma casa de festas para casamentos, debutantes, aniversários e eventos corporativos. O site apresenta o espaço e permite que o cliente:
 
-### Primeira vez
+1. veja no calendário quais datas estão livres;
+2. crie uma conta, com confirmação do e-mail por código;
+3. envie o pedido de reserva, que entra no banco como **pendente** para a equipe confirmar pelo WhatsApp.
 
-1. **Crie um repositório no GitHub** (pode ser privado) e envie **todos os arquivos desta pasta**, incluindo a pasta `.devcontainer`.
-   - Pelo site: *Add file → Upload files* e arraste o conteúdo da pasta. Pastas que começam com ponto (`.devcontainer`) às vezes não aparecem no explorador de arquivos. No Windows, ative "Itens ocultos" na aba *Exibir*.
-   - Ou pelo terminal, com Git:
-     ```bash
-     git init
-     git add .
-     git commit -m "Radiance: site + back-end"
-     git branch -M main
-     git remote add origin https://github.com/SEU-USUARIO/radiance.git
-     git push -u origin main
-     ```
-2. No repositório, clique em **Code → aba Codespaces → Create codespace on main**.
-3. Espere de 2 a 4 minutos na primeira vez. O GitHub baixa o MySQL, cria o banco, instala as dependências e gera o `backend/.env` sozinho.
-4. Quando o terminal mostrar `Iniciando o site em http://localhost:5000`, abra a aba **PORTAS** (*PORTS*), passe o mouse em **Site Radiance (5000)** e clique no ícone do **globo**. O site abre numa aba nova.
+## Funcionalidades
 
-> **Código de verificação do cadastro:** aparece **no terminal** do Codespace, em uma linha como `Código para voce@email.com: 482913`. Para receber por e-mail, preencha o SMTP no `backend/.env` (veja a parte do Gmail mais abaixo) e reinicie o servidor.
+**Site**
 
-### Nas próximas vezes
+- Página inicial com o espaço, a estrutura, a galeria, o passo a passo da reserva, depoimentos, perguntas frequentes e contato.
+- Página de reserva separada, com prévia do pedido em tempo real.
+- Modo claro e escuro, com a escolha salva no navegador.
+- Layout responsivo, do celular ao desktop.
+- Botão flutuante do WhatsApp.
 
-Abra o Codespace em **Code → Codespaces** ou em [github.com/codespaces](https://github.com/codespaces). O site inicia sozinho, e os dados do banco (contas, reservas) continuam lá.
+**Reserva**
 
-### Coisas úteis
+- Calendário próprio que marca as datas já ocupadas.
+- Eventos de **um dia** (turno diurno ou noturno) ou de **vários dias seguidos**.
+- Nome e WhatsApp preenchidos com os dados da conta.
+- Se a data for ocupada enquanto o cliente preenche, o site avisa e atualiza o calendário.
 
-- **Reiniciar o servidor:** no terminal, aperte `Ctrl+C` e rode `bash .devcontainer/iniciar.sh`.
-- **Mexer no banco** (por exemplo, aprovar uma reserva):
-  ```bash
-  mysql -h db -u radiance -pradiance-dev radiance
-  ```
-  ```sql
-  UPDATE aluguel SET status = 'confirmado', valor_total = 3500.00 WHERE id = 1;
-  ```
-  Se o comando `mysql` não existir, instale com `sudo apt-get update && sudo apt-get install -y default-mysql-client`.
-- **Mostrar o site para alguém:** na aba PORTAS, clique com o botão direito em *Site Radiance* → *Visibilidade da porta* → **Público** e mande o link.
-  - Antes, troque `FLASK_DEBUG=1` por `FLASK_DEBUG=0` no `backend/.env` e reinicie o servidor. O modo de desenvolvimento tem um console de depuração que não deve ficar aberto para outras pessoas.
-  - O link só funciona enquanto o Codespace estiver ligado.
-- **Desligar:** o Codespace desliga sozinho depois de um tempo parado. Para desligar na hora, use *Code → Codespaces → ... → Stop codespace*. Contas gratuitas têm uma cota mensal de uso, que dá para acompanhar em *Settings → Billing*.
-- **Recomeçar o banco do zero:** apague o Codespace e crie outro. O banco é recriado a partir de `banco/radiance_banco.sql`.
+**Conta do cliente**
 
-### Problemas comuns
+- Cadastro com validação de CPF, maioridade (18+), telefone e e-mail.
+- **CEP com preenchimento automático** do endereço (via [ViaCEP](https://viacep.com.br)).
+- **Confirmação do e-mail por código de 6 números**, que vale 10 minutos e aceita até 5 tentativas, com reenvio.
+- Máscaras de CPF, telefone e CEP que deixam editar qualquer parte do número.
+- Login com a sessão mantida entre as páginas.
 
-- **"O banco não respondeu":** na primeira vez, o MySQL pode demorar. Espere um pouco e rode `bash .devcontainer/iniciar.sh` de novo.
-- **A aba PORTAS não mostra a 5000:** o servidor não está rodando. Veja a mensagem de erro no terminal e rode `bash .devcontainer/iniciar.sh`.
-- **Mudei o `radiance_banco.sql` e nada mudou:** o script só roda quando o banco é criado pela primeira vez. Crie um Codespace novo para aplicar.
+**Segurança no back-end**
 
----
+- Senhas guardadas só como hash. O código de verificação é guardado como HMAC, nunca em texto.
+- Cookie de sessão `HttpOnly` e `SameSite=Lax`, e a API só aceita JSON (proteção contra CSRF).
+- Mensagem de login genérica e bloqueio depois de várias tentativas erradas.
+- Toda validação do site é refeita no servidor.
+- O banco impede, por trigger, duas reservas confirmadas na mesma data.
 
-## Rodar no seu computador
+## Telas
 
-### 1. Requisitos
+| Pedido de reserva | Cadastro com CEP automático |
+|---|---|
+| <img src="docs/screenshots/reserva.png" alt="Página de reserva com calendário e prévia do pedido"> | <img src="docs/screenshots/cadastro.png" alt="Cadastro com endereço preenchido pelo CEP"> |
+| **Confirmação do e-mail** | **Modo escuro** |
+| <img src="docs/screenshots/verificacao.png" alt="Tela para digitar o código de 6 números"> | <img src="docs/screenshots/inicio-escuro.png" alt="Página inicial no modo escuro"> |
 
-- Python 3.10 ou mais novo
-- MySQL 8.0.16+ ou MariaDB 10.5+
+<p align="center"><img src="docs/screenshots/celular-escuro.png" alt="Site no celular, modo escuro" width="230"></p>
 
-### 2. Criar o banco
+## Tecnologias
 
-No terminal (ou cole o arquivo no MySQL Workbench e execute):
+| Parte | Tecnologia |
+|---|---|
+| Front-end | HTML5, CSS3 e JavaScript puro (sem frameworks) |
+| Back-end | Python 3 + Flask, PyMySQL |
+| Banco de dados | MySQL 8 (ou MariaDB 10.5+) |
+| Serviços externos | ViaCEP (endereço pelo CEP) e SMTP (envio do código) |
+| Ambiente | GitHub Codespaces / Dev Containers (Docker Compose) |
+
+## Como rodar
+
+### Opção 1: GitHub Codespaces (recomendado, sem instalar nada)
+
+1. Clique em **Code → Codespaces → Create codespace on main**.
+2. Espere alguns minutos na primeira vez. O ambiente cria o banco, instala as dependências e inicia o site sozinho.
+3. Abra a aba **PORTAS**, passe o mouse em **Site Radiance (5000)** e clique no globo.
+
+Os códigos de verificação de e-mail aparecem no terminal enquanto o SMTP não estiver configurado.
+
+### Opção 2: no seu computador
+
+Requisitos: **Python 3.10+** e **MySQL 8**.
 
 ```bash
+# 1. Banco de dados (apaga e recria o banco "radiance")
 mysql -u root -p < banco/radiance_banco.sql
-```
 
-> Atenção: o script **apaga e recria** o banco `radiance`. Não rode de novo depois que o site estiver em uso.
-
-Crie um usuário só para o site, sem poder de apagar tabelas:
-
-```sql
-CREATE USER 'radiance'@'localhost' IDENTIFIED BY 'troque-esta-senha';
-GRANT SELECT, INSERT, UPDATE, DELETE ON radiance.* TO 'radiance'@'localhost';
-FLUSH PRIVILEGES;
-```
-
-### 3. Instalar e configurar o back-end
-
-```bash
+# 2. Back-end
 cd backend
 python -m venv .venv
-# Windows:  .venv\Scripts\activate
-# Linux/Mac: source .venv/bin/activate
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
+cp .env.example .env               # Windows: copy .env.example .env
+#    → preencha SECRET_KEY e os dados do banco no .env
+
+# 3. Rodar
+python app.py                      # abra http://localhost:5000
 ```
 
-Copie `.env.example` para `.env` e preencha:
+O passo a passo completo está no **[Guia de instalação](docs/INSTALACAO.md)**: usuário do banco, e-mail pelo Gmail, produção e problemas comuns.
 
-- `SECRET_KEY`: gere uma com `python -c "import secrets; print(secrets.token_hex(32))"`. Se ela mudar, todos são deslogados e os códigos pendentes deixam de valer.
-- `DB_USER` e `DB_PASSWORD`: o usuário criado no passo 2.
-- `SMTP_*`: deixe `SMTP_HOST` vazio por enquanto. O código de verificação vai aparecer **no terminal**.
+### Opção 3: só ver o visual
 
-> O `.env` tem senhas. Não envie esse arquivo para o GitHub (já está no `.gitignore`).
+Abra `site/index.html` direto no navegador. O site entra no **modo de teste**: nada é gravado, o código de e-mail aparece na tela e o calendário mostra datas de exemplo.
 
-### 4. Rodar
-
-```bash
-python app.py
-```
-
-Abra **http://localhost:5000**. Para testar o cadastro, crie uma conta e copie o código que aparece no terminal:
+## Estrutura
 
 ```
-[SMTP não configurado] Código para voce@email.com: 482913
+├── .devcontainer/      configuração do Codespaces (Python + MySQL prontos)
+├── site/               páginas (index.html, reserva.html) e assets/ (CSS e JS)
+├── backend/            servidor Flask: API em /api/* e as páginas do site
+│   ├── app.py          ponto de entrada
+│   ├── auth.py         cadastro, código por e-mail, login e sessão
+│   ├── reservas.py     calendário e pedidos de reserva
+│   ├── validacao.py    regras de validação
+│   └── email_envio.py  envio do código por SMTP
+├── banco/
+│   └── radiance_banco.sql
+└── docs/               guia de instalação e prints das telas
 ```
-
-### 5. Enviar o e-mail de verdade (Gmail)
-
-1. Na conta Google, ative a **verificação em duas etapas**.
-2. Crie uma **senha de app** em *Conta Google → Segurança → Senhas de app*.
-3. No `.env`:
-
-```
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_SSL=false
-SMTP_USER=radiance.recepcoes@gmail.com
-SMTP_PASSWORD=a-senha-de-app-de-16-letras
-SMTP_FROM=Radiance Recepções e Eventos <radiance.recepcoes@gmail.com>
-```
-
-Outros provedores, como Brevo, Mailgun, Zoho ou o e-mail da hospedagem, funcionam do mesmo jeito: basta trocar host, porta e login.
-
-### 6. Colocar no ar (produção)
-
-- Use um servidor de produção, não o `python app.py`:
-  ```bash
-  gunicorn -w 2 -b 0.0.0.0:8000 app:app
-  ```
-  (Render, Railway e VPS rodam esse comando. No Windows, use `waitress-serve --port=8000 app:app` depois de `pip install waitress`.)
-- O site precisa estar em **HTTPS**. Depois disso, coloque `COOKIE_SECURE=true` no `.env`.
-- Configure o fuso do servidor para `America/Sao_Paulo` (variável `TZ`). As validades do código usam o relógio do banco, mas a regra "data já passou" usa o do servidor.
-- O limite de tentativas de login fica na memória de cada processo. Com vários processos ou servidores, troque por Redis ou Flask-Limiter.
-
----
 
 ## API
 
-Todas as rotas respondem JSON. Os erros vêm como `{ "mensagem": "...", "campo": "..." }`, e o site mostra a mensagem no campo certo. Os `POST` só aceitam `Content-Type: application/json`, o que protege contra CSRF junto com o cookie `SameSite=Lax`.
+<details>
+<summary>Ver rotas</summary>
 
-| Método | Rota | O que faz |
+| Método | Rota | Descrição |
 |---|---|---|
-| POST | `/api/cadastro` | Valida os dados, guarda em `cadastro_pendente` (senha já em hash) e envia o código de 6 números. |
-| POST | `/api/cadastro/confirmar` | `{ email, codigo }` → cria o cliente e já faz login. O código vale 10 min e aceita 5 tentativas. |
-| POST | `/api/cadastro/reenviar` | `{ email }` → código novo, com espera de 60 s entre envios. |
-| POST | `/api/login` | `{ email, senha }`. Mensagem genérica se errar; bloqueio após 10 erros em 15 min. |
-| POST | `/api/logout` | Encerra a sessão. |
-| GET | `/api/me` | Cliente logado (`id, nome, email, telefone`) ou 401. |
-| GET | `/api/datas-ocupadas` | Reservas aguardando assinatura, confirmadas ou concluídas, de hoje em diante. |
-| POST | `/api/reservas` | Exige login. Cria o pedido com status `pendente`. Responde 409 se a data já estiver ocupada. |
+| `POST` | `/api/cadastro` | Valida os dados e envia o código de 6 números por e-mail |
+| `POST` | `/api/cadastro/confirmar` | Confere o código, cria a conta e faz login |
+| `POST` | `/api/cadastro/reenviar` | Envia um código novo (espera de 60 s) |
+| `POST` | `/api/login` | Entra na conta |
+| `POST` | `/api/logout` | Sai da conta |
+| `GET` | `/api/me` | Dados do cliente logado |
+| `GET` | `/api/datas-ocupadas` | Datas reservadas, para o calendário |
+| `POST` | `/api/reservas` | Cria o pedido de reserva (exige login) |
 
-### Regras do pedido de reserva
+Erros vêm como `{ "mensagem": "...", "campo": "..." }`. Detalhes no [Guia de instalação](docs/INSTALACAO.md#api).
 
-- O pedido entra como **pendente**, com `valor_total` vazio, porque a equipe define o orçamento na visita.
-- Pedidos pendentes **não bloqueiam** o calendário. A data só fica ocupada quando a equipe muda o status para `aguardando_assinatura` ou `confirmado`, e o trigger do banco impede duas reservas ocupando a mesma data.
-- O campo "Observações" vira um registro em `observacoes`. Se o cliente informar um WhatsApp diferente do cadastro, ele também vai como observação para a equipe.
+</details>
 
-## O que ainda não existe
+## Banco de dados
 
-- **Painel da equipe:** aprovar pedidos, definir valor, registrar pagamentos e validar contratos. Por enquanto, isso é feito direto no banco, por exemplo:
-  ```sql
-  UPDATE aluguel SET status = 'aguardando_assinatura', valor_total = 3500.00 WHERE id = 1;
-  ```
-- **Recuperação de senha** ("esqueci minha senha").
-- **Contrato:** geração do PDF preenchido, envio do arquivo assinado e conferência pelo hash (as tabelas já estão prontas).
+| Tabela | Guarda |
+|---|---|
+| `cliente` | Contas, com endereço separado, CEP e e-mail confirmado |
+| `cadastro_pendente` | Cadastros aguardando o código de e-mail |
+| `aluguel` | Pedidos e reservas: datas, turno, convidados, status e valor |
+| `pagamento` | Sinal e restante de cada reserva |
+| `observacoes` | Observações do cliente e da equipe |
+| `contrato` | Contrato gerado e assinado (gov.br), com hash dos arquivos |
+
+A view `vw_datas_ocupadas` alimenta o calendário.
+
+## Próximos passos
+
+- [ ] Painel da equipe: aprovar pedidos, definir valores, registrar pagamentos
+- [ ] Geração do contrato em PDF e envio do arquivo assinado pelo gov.br
+- [ ] Recuperação de senha
+- [ ] Área do cliente com o histórico de reservas
