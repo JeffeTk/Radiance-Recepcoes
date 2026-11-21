@@ -5,10 +5,12 @@
 ```
 radiance/
 ├── .devcontainer/        configuração do GitHub Codespaces (Python + MySQL prontos)
-├── site/                 páginas (index.html, reserva.html) e assets/ (CSS e JS)
+├── site/                 páginas (index.html, reserva.html, admin.html) e assets/ (CSS e JS)
 ├── backend/              servidor em Python + Flask (API em /api/* e as páginas do site)
 │   ├── app.py            ponto de entrada
 │   ├── auth.py           cadastro com código por e-mail, login, logout, sessão
+│   ├── admin.py          área administrativa (/admin): login e reservas manuais
+│   ├── criar_admin.py    comando que cria o administrador
 │   ├── reservas.py       datas ocupadas e pedidos de reserva
 │   ├── validacao.py      regras de validação (as mesmas do site)
 │   ├── email_envio.py    envio do código por SMTP
@@ -16,7 +18,8 @@ radiance/
 │   ├── requirements.txt
 │   └── .env.example      modelo de configuração
 └── banco/
-    └── radiance_banco.sql   cria o banco (tabelas, regras e trigger)
+    ├── radiance_banco.sql   cria o banco (tabelas, regras e trigger)
+    └── migracoes/           atualizações para bancos criados com versões anteriores
 ```
 
 O site funciona de três jeitos:
@@ -57,6 +60,7 @@ Abra o Codespace em **Code → Codespaces** ou em [github.com/codespaces](https:
 ### Coisas úteis
 
 - **Reiniciar o servidor:** no terminal, aperte `Ctrl+C` e rode `bash .devcontainer/iniciar.sh`.
+- **Criar o administrador da área `/admin`:** em um terminal novo, `cd backend && python criar_admin.py`. Veja a seção [Área administrativa](#área-administrativa).
 - **Mexer no banco** (por exemplo, aprovar uma reserva):
   ```bash
   mysql -h db -u radiance -pradiance-dev radiance
@@ -64,7 +68,7 @@ Abra o Codespace em **Code → Codespaces** ou em [github.com/codespaces](https:
   ```sql
   UPDATE aluguel SET status = 'confirmado', valor_total = 3500.00 WHERE id = 1;
   ```
-  Se o comando `mysql` não existir, instale com `sudo apt-get update && sudo apt-get install -y default-mysql-client`.
+  Em Codespaces criados antes desta versão, se o comando `mysql` não existir, instale com `sudo apt-get update && sudo apt-get install -y default-mysql-client`.
 - **Mostrar o site para alguém:** na aba PORTAS, clique com o botão direito em *Site Radiance* → *Visibilidade da porta* → **Público** e mande o link.
   - Antes, troque `FLASK_DEBUG=1` por `FLASK_DEBUG=0` no `backend/.env` e reinicie o servidor. O modo de desenvolvimento tem um console de depuração que não deve ficar aberto para outras pessoas.
   - O link só funciona enquanto o Codespace estiver ligado.
@@ -164,6 +168,61 @@ Outros provedores, como Brevo, Mailgun, Zoho ou o e-mail da hospedagem, funciona
 
 ---
 
+## Área administrativa
+
+Em **`/admin`** (por exemplo, `http://localhost:5000/admin`), a equipe registra reservas fechadas fora do site, como pelo WhatsApp, pelas redes sociais, por telefone ou presencialmente. Lá também dá para ver todas as reservas. O endereço não aparece em nenhum link do site, a página não entra no Google e todas as ações exigem login de administrador.
+
+### Criar o administrador
+
+Não existe conta padrão. Crie a sua pelo terminal, dentro da pasta `backend`:
+
+```bash
+python criar_admin.py
+```
+
+O comando pede e-mail, nome e senha (mínimo de 10 caracteres, com letras e números). A senha não aparece enquanto você digita e é guardada só como hash. Para trocar a senha depois, rode o mesmo comando com o mesmo e-mail.
+
+No Codespaces, abra um terminal novo (**+**) e rode `cd backend && python criar_admin.py`.
+
+### O que dá para fazer
+
+- **Registrar uma reserva** com:
+  - o canal (presencial, WhatsApp, Instagram, Facebook, telefone ou outro);
+  - o cliente;
+  - a data, o turno ou os vários dias, e o número de convidados;
+  - o status, o valor total e o sinal, se já foi pago;
+  - observações.
+- **Cliente já cadastrado:** busque por nome, CPF ou telefone.
+- **Novo cliente:** preencha nome, CPF, nascimento, WhatsApp, e-mail (opcional) e endereço, com CEP automático. Ele fica **sem conta no site**, sem senha.
+- **Status:**
+  - *Pendente* não bloqueia o calendário, e o valor pode ficar em branco.
+  - *Aguardando assinatura* e *Confirmado* bloqueiam a data no calendário do site e exigem o valor total.
+- **Ver as reservas registradas:** tanto as do site quanto as manuais, com filtro por status e por cliente.
+
+Se um cliente cadastrado pela equipe criar conta no site depois **com o mesmo CPF**, o cadastro dele é completado (sem duplicar), e as reservas feitas antes aparecem na conta.
+
+### Atualizar um banco criado antes da área administrativa
+
+Se o banco foi criado com uma versão anterior do `radiance_banco.sql` (por exemplo, um Codespace que já existia), rode a migração **uma vez**. Ela cria a tabela `administrador` e as colunas novas, e mantém os dados.
+
+**No Codespaces** (terminal novo):
+```bash
+sudo apt-get update && sudo apt-get install -y default-mysql-client   # só se o comando mysql não existir
+mysql -h db -u root -proot-dev-codespaces radiance < banco/migracoes/001_area_administrativa.sql
+cd backend && python criar_admin.py
+```
+Depois reinicie o servidor: `Ctrl+C` no terminal dele e `bash .devcontainer/iniciar.sh`.
+
+**No seu computador:**
+```bash
+mysql -u root -p radiance < banco/migracoes/001_area_administrativa.sql
+cd backend && python criar_admin.py
+```
+
+> Quem cria o banco do zero com o `radiance_banco.sql` atual (ou um Codespace novo) **não** precisa da migração.
+
+---
+
 ## API
 
 Todas as rotas respondem JSON. Os erros vêm como `{ "mensagem": "...", "campo": "..." }`, e o site mostra a mensagem no campo certo. Os `POST` só aceitam `Content-Type: application/json`, o que protege contra CSRF junto com o cookie `SameSite=Lax`.
@@ -178,6 +237,14 @@ Todas as rotas respondem JSON. Os erros vêm como `{ "mensagem": "...", "campo":
 | GET | `/api/me` | Cliente logado (`id, nome, email, telefone`) ou 401. |
 | GET | `/api/datas-ocupadas` | Reservas aguardando assinatura, confirmadas ou concluídas, de hoje em diante. |
 | POST | `/api/reservas` | Exige login. Cria o pedido com status `pendente`. Responde 409 se a data já estiver ocupada. |
+| POST | `/api/admin/login` | `{ email, senha }` do administrador. Mesmo bloqueio de tentativas do login do cliente. |
+| POST | `/api/admin/logout` | Sai da área administrativa (não afeta o login de cliente no mesmo navegador). |
+| GET | `/api/admin/me` | Administrador logado, ou 401. |
+| GET | `/api/admin/clientes?q=` | Busca clientes por nome, CPF ou telefone (até 15). |
+| GET | `/api/admin/reservas` | Reservas com cliente, valor, total pago, origem e quem registrou. |
+| POST | `/api/admin/reservas` | Registra uma reserva feita fora do site: `cliente_id` (existente) **ou** `cliente` (novo), mais `origem`, dados do evento, `status`, `valor_total`, `sinal` e `observacao`. Responde 409 se a data estiver ocupada. |
+
+Todas as rotas `/api/admin/*`, menos o login, respondem **401** para quem não é administrador, inclusive clientes logados.
 
 ### Regras do pedido de reserva
 
@@ -187,7 +254,7 @@ Todas as rotas respondem JSON. Os erros vêm como `{ "mensagem": "...", "campo":
 
 ## O que ainda não existe
 
-- **Painel da equipe:** aprovar pedidos, definir valor, registrar pagamentos e validar contratos. Por enquanto, isso é feito direto no banco, por exemplo:
+- **Na área administrativa ainda falta:** mudar o status, editar ou cancelar uma reserva, registrar o pagamento do restante e validar contratos. Por enquanto, isso é feito direto no banco, por exemplo:
   ```sql
   UPDATE aluguel SET status = 'aguardando_assinatura', valor_total = 3500.00 WHERE id = 1;
   ```

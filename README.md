@@ -2,7 +2,7 @@
 
 # Radiance Recepções e Eventos
 
-**Site da casa de festas Radiance, em João Pessoa/PB, com calendário de disponibilidade, pedido de reserva on-line e área do cliente.**
+**Site da casa de festas Radiance, em João Pessoa/PB, com calendário de disponibilidade, pedido de reserva on-line, área do cliente e área administrativa.**
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)
 ![Flask](https://img.shields.io/badge/Flask-3-000000?logo=flask&logoColor=white)
@@ -25,6 +25,8 @@ A Radiance é uma casa de festas para casamentos, debutantes, aniversários e ev
 1. veja no calendário quais datas estão livres;
 2. crie uma conta, com confirmação do e-mail por código;
 3. envie o pedido de reserva, que entra no banco como **pendente** para a equipe confirmar pelo WhatsApp.
+
+A equipe tem uma **área administrativa** para registrar as reservas fechadas fora do site (WhatsApp, redes sociais, telefone ou presencial) e acompanhar todas as reservas.
 
 ## Funcionalidades
 
@@ -51,6 +53,14 @@ A Radiance é uma casa de festas para casamentos, debutantes, aniversários e ev
 - Máscaras de CPF, telefone e CEP que deixam editar qualquer parte do número.
 - Login com a sessão mantida entre as páginas.
 
+**Área administrativa (`/admin`)**
+
+- Acesso só para administradores, criados por um comando no terminal (sem conta padrão).
+- Registro manual de reservas, com o canal de origem, o cliente (já cadastrado, ou novo com CEP automático), o evento, o status, o valor e o sinal pago.
+- Aviso na hora se a data já estiver ocupada.
+- Lista de todas as reservas, do site e manuais, com filtros.
+- Clientes cadastrados pela equipe ficam sem conta. Se depois criarem conta no site com o mesmo CPF, o cadastro é completado e as reservas antigas aparecem para eles.
+
 **Segurança no back-end**
 
 - Senhas guardadas só como hash. O código de verificação é guardado como HMAC, nunca em texto.
@@ -68,6 +78,10 @@ A Radiance é uma casa de festas para casamentos, debutantes, aniversários e ev
 | <img src="docs/screenshots/verificacao.png" alt="Tela para digitar o código de 6 números"> | <img src="docs/screenshots/inicio-escuro.png" alt="Página inicial no modo escuro"> |
 
 <p align="center"><img src="docs/screenshots/celular-escuro.png" alt="Site no celular, modo escuro" width="230"></p>
+
+| Área administrativa: nova reserva | Área administrativa: reservas registradas |
+|---|---|
+| <img src="docs/screenshots/admin-nova-reserva.png" alt="Formulário para registrar uma reserva feita fora do site"> | <img src="docs/screenshots/admin-lista.png" alt="Lista de reservas com status, valores e origem"> |
 
 ## Tecnologias
 
@@ -87,7 +101,7 @@ A Radiance é uma casa de festas para casamentos, debutantes, aniversários e ev
 2. Espere alguns minutos na primeira vez. O ambiente cria o banco, instala as dependências e inicia o site sozinho.
 3. Abra a aba **PORTAS**, passe o mouse em **Site Radiance (5000)** e clique no globo.
 
-Os códigos de verificação de e-mail aparecem no terminal enquanto o SMTP não estiver configurado.
+Os códigos de verificação de e-mail aparecem no terminal enquanto o SMTP não estiver configurado. Para a área administrativa, crie o administrador em um terminal novo com `cd backend && python criar_admin.py` e acesse `/admin`.
 
 ### Opção 2: no seu computador
 
@@ -105,11 +119,14 @@ pip install -r requirements.txt
 cp .env.example .env               # Windows: copy .env.example .env
 #    → preencha SECRET_KEY e os dados do banco no .env
 
-# 3. Rodar
-python app.py                      # abra http://localhost:5000
+# 3. Administrador da área /admin
+python criar_admin.py
+
+# 4. Rodar
+python app.py                      # site: http://localhost:5000  ·  admin: http://localhost:5000/admin
 ```
 
-O passo a passo completo está no **[Guia de instalação](docs/INSTALACAO.md)**: usuário do banco, e-mail pelo Gmail, produção e problemas comuns.
+O passo a passo completo está no **[Guia de instalação](docs/INSTALACAO.md)**: usuário do banco, área administrativa, atualização de banco antigo, e-mail pelo Gmail, produção e problemas comuns.
 
 ### Opção 3: só ver o visual
 
@@ -119,15 +136,18 @@ Abra `site/index.html` direto no navegador. O site entra no **modo de teste**: n
 
 ```
 ├── .devcontainer/      configuração do Codespaces (Python + MySQL prontos)
-├── site/               páginas (index.html, reserva.html) e assets/ (CSS e JS)
+├── site/               páginas (index.html, reserva.html, admin.html) e assets/ (CSS e JS)
 ├── backend/            servidor Flask: API em /api/* e as páginas do site
 │   ├── app.py          ponto de entrada
 │   ├── auth.py         cadastro, código por e-mail, login e sessão
+│   ├── admin.py        área administrativa: login e reservas manuais
+│   ├── criar_admin.py  cria o administrador pelo terminal
 │   ├── reservas.py     calendário e pedidos de reserva
 │   ├── validacao.py    regras de validação
 │   └── email_envio.py  envio do código por SMTP
 ├── banco/
-│   └── radiance_banco.sql
+│   ├── radiance_banco.sql
+│   └── migracoes/      atualizações para bancos de versões anteriores
 └── docs/               guia de instalação e prints das telas
 ```
 
@@ -146,6 +166,10 @@ Abra `site/index.html` direto no navegador. O site entra no **modo de teste**: n
 | `GET` | `/api/me` | Dados do cliente logado |
 | `GET` | `/api/datas-ocupadas` | Datas reservadas, para o calendário |
 | `POST` | `/api/reservas` | Cria o pedido de reserva (exige login) |
+| `POST` | `/api/admin/login` · `/api/admin/logout` | Entra e sai da área administrativa |
+| `GET` | `/api/admin/clientes?q=` | Busca clientes por nome, CPF ou telefone |
+| `GET` | `/api/admin/reservas` | Lista as reservas (admin) |
+| `POST` | `/api/admin/reservas` | Registra uma reserva feita fora do site (admin) |
 
 Erros vêm como `{ "mensagem": "...", "campo": "..." }`. Detalhes no [Guia de instalação](docs/INSTALACAO.md#api).
 
@@ -155,9 +179,10 @@ Erros vêm como `{ "mensagem": "...", "campo": "..." }`. Detalhes no [Guia de in
 
 | Tabela | Guarda |
 |---|---|
-| `cliente` | Contas, com endereço separado, CEP e e-mail confirmado |
+| `administrador` | Quem acessa a área administrativa |
+| `cliente` | Clientes: com conta no site (e-mail confirmado e senha) ou cadastrados pela equipe |
 | `cadastro_pendente` | Cadastros aguardando o código de e-mail |
-| `aluguel` | Pedidos e reservas: datas, turno, convidados, status e valor |
+| `aluguel` | Pedidos e reservas: datas, turno, convidados, status, valor, origem e quem registrou |
 | `pagamento` | Sinal e restante de cada reserva |
 | `observacoes` | Observações do cliente e da equipe |
 | `contrato` | Contrato gerado e assinado (gov.br), com hash dos arquivos |
@@ -166,7 +191,8 @@ A view `vw_datas_ocupadas` alimenta o calendário.
 
 ## Próximos passos
 
-- [ ] Painel da equipe: aprovar pedidos, definir valores, registrar pagamentos
+- [x] Área administrativa com registro manual de reservas
+- [ ] Na área administrativa: mudar status, editar e cancelar reservas, registrar o pagamento do restante
 - [ ] Geração do contrato em PDF e envio do arquivo assinado pelo gov.br
 - [ ] Recuperação de senha
 - [ ] Área do cliente com o histórico de reservas

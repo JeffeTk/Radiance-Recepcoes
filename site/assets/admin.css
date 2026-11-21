@@ -1,0 +1,147 @@
+/* =====================================================================
+   RADIANCE — área administrativa (admin.html)
+   Usa as variáveis e componentes de style.css (cores, .field, .btn…)
+   ===================================================================== */
+
+.page-admin{background:var(--green-pale);}
+.adm-main{padding:110px 0 80px; min-height:100vh;}
+.adm-wrap{max-width:1140px; margin:0 auto; padding:0 24px;}
+.adm-wrap[hidden]{display:none;}
+
+.adm-card{
+  background:var(--ivory-soft);
+  border:1px solid rgba(var(--line-rgb),.16);
+  padding:28px 30px;
+}
+.adm-muted{color:var(--ink-soft); font-size:.92rem;}
+.adm-muted code{font-family:var(--font-mono); font-size:.85em;}
+.adm-full{width:100%; justify-content:center;}
+.sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;}
+
+/* ---------- header ---------- */
+.adm-user{font-family:var(--font-mono); font-size:.74rem; color:var(--ink-soft); letter-spacing:.04em;}
+.adm-sair{padding:9px 16px !important; background:none;}
+.page-admin .nav-cta .btn-ghost{display:inline-flex;}   /* style.css esconde o botão no celular */
+.page-admin .nav-cta [hidden]{display:none !important;} /* …mas "Sair" some quando não está logado */
+
+/* ---------- login ---------- */
+.adm-login{max-width:440px; margin:40px auto 0; border-color:var(--gold);}
+.adm-login h1{font-size:2rem; font-style:italic; margin:8px 0 6px;}
+.adm-login .adm-muted{margin-bottom:22px;}
+
+/* ---------- topo e abas ---------- */
+.adm-topo{display:flex; justify-content:space-between; align-items:flex-end; gap:20px; flex-wrap:wrap; margin-bottom:24px;}
+.adm-topo h1{font-size:2.2rem; margin-top:6px;}
+.adm-abas{display:flex; gap:4px; background:var(--ivory-soft); border:1px solid rgba(var(--line-rgb),.16); padding:4px;}
+.adm-aba{
+  background:none; border:none; cursor:pointer; padding:10px 16px;
+  font-family:var(--font-mono); font-size:.74rem; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft);
+}
+.adm-aba.ativa{background:var(--wine); color:var(--on-dark);}
+.adm-aba-conteudo[hidden]{display:none;}
+.adm-intro{margin-bottom:18px;}
+
+/* ---------- blocos do formulário ---------- */
+.adm-bloco{margin:0 0 18px; min-width:0;}
+.adm-bloco legend{
+  float:left; width:100%; padding:0; margin-bottom:20px;
+  font-family:var(--font-display); font-size:1.25rem; font-weight:600; color:var(--heading);
+}
+.adm-bloco legend small{font-family:var(--font-body); font-size:.8rem; font-weight:400; color:var(--ink-soft);}
+.adm-bloco legend + *{clear:both;}
+.adm-num{
+  display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; margin-right:8px;
+  border-radius:50%; background:var(--gold); color:var(--green-deep); font-family:var(--font-mono); font-size:.8rem;
+}
+.field label small{text-transform:none; letter-spacing:0;}
+
+/* opção "já cadastrado" / "novo" */
+.adm-seg{display:inline-flex; border:1px solid rgba(var(--line-rgb),.25); margin-bottom:20px; flex-wrap:wrap;}
+.adm-seg label{
+  display:flex; align-items:center; gap:8px; padding:10px 16px; cursor:pointer;
+  font-family:var(--font-mono); font-size:.74rem; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-soft);
+}
+.adm-seg input{accent-color:var(--wine);}
+.adm-seg label:has(input:checked){background:var(--wine); color:var(--on-dark);}
+.adm-seg label:has(input:checked) input{accent-color:var(--gold);}
+
+/* resultados da busca */
+.adm-resultados{list-style:none; margin:-8px 0 16px; padding:0; border:1px solid rgba(var(--line-rgb),.2);}
+.adm-resultados[hidden]{display:none;}
+.adm-resultados li + li{border-top:1px solid rgba(var(--line-rgb),.12);}
+.adm-resultados button, .adm-resultados .adm-nada{
+  display:flex; justify-content:space-between; gap:12px; width:100%; text-align:left;
+  padding:12px 14px; background:none; border:none; cursor:pointer; color:var(--ink); font:inherit; font-size:.92rem;
+}
+.adm-resultados .adm-nada{cursor:default; color:var(--ink-soft);}
+.adm-resultados button:hover, .adm-resultados button:focus-visible{background:var(--green-pale); outline:none;}
+.adm-resultados small{font-family:var(--font-mono); font-size:.72rem; color:var(--ink-soft); white-space:nowrap;}
+
+.adm-selecionado{
+  display:flex; justify-content:space-between; align-items:center; gap:16px;
+  padding:14px 16px; border:1px solid var(--gold); background:rgba(201,162,39,.08);
+}
+.adm-selecionado[hidden]{display:none;}
+.adm-selecionado strong{display:block; color:var(--heading);}
+.adm-selecionado span{font-family:var(--font-mono); font-size:.74rem; color:var(--ink-soft);}
+.adm-link{background:none; border:none; padding:0; cursor:pointer; color:var(--wine); font:inherit; font-size:.86rem; text-decoration:underline;}
+body.dark-mode .adm-link{color:#E08A96;}
+.adm-30{display:block; margin-top:6px; font-size:.8rem;}
+
+.adm-row3{grid-template-columns:1fr 1fr 1fr !important;}
+.adm-check{display:flex; align-items:center; gap:10px; margin:2px 0 18px; cursor:pointer; color:var(--ink); font-size:.94rem;}
+.adm-check input{width:18px; height:18px; accent-color:var(--wine);}
+#blocoSinal[hidden], #blocoNovo[hidden], #blocoExistente[hidden], #campoFinal[hidden], #campoTurno[hidden]{display:none;}
+
+.adm-aviso{
+  margin:-6px 0 18px; padding:10px 14px; font-size:.88rem;
+  border-left:3px solid var(--wine); background:rgba(107,36,48,.08); color:var(--ink);
+}
+.adm-aviso[hidden]{display:none;}
+
+.adm-enviar{display:flex; justify-content:flex-end; align-items:center; gap:18px; flex-wrap:wrap;}
+.adm-enviar .form-msg{flex:1 1 320px; margin:0;}
+.adm-enviar .btn[disabled]{opacity:.6; cursor:wait; transform:none;}
+
+/* ---------- lista ---------- */
+.adm-filtros{display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px;}
+.adm-filtros input, .adm-filtros select{
+  padding:11px 12px; border:1px solid rgba(var(--line-rgb),.3); background:var(--ivory-soft); color:var(--ink);
+  font-family:var(--font-body); font-size:.92rem; border-radius:var(--radius);
+}
+.adm-filtros input{flex:1 1 240px;}
+.adm-filtros .btn{padding:11px 18px; background:none;}
+.adm-tabela-wrap{overflow-x:auto; background:var(--ivory-soft); border:1px solid rgba(var(--line-rgb),.16);}
+.adm-tabela{width:100%; border-collapse:collapse; font-size:.88rem; min-width:860px;}
+.adm-tabela th{
+  text-align:left; padding:12px 14px; white-space:nowrap;
+  font-family:var(--font-mono); font-size:.68rem; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft);
+  border-bottom:1px solid rgba(var(--line-rgb),.2);
+}
+.adm-tabela td{padding:12px 14px; border-bottom:1px solid rgba(var(--line-rgb),.1); vertical-align:top; color:var(--ink);}
+.adm-tabela td.dinheiro{white-space:nowrap;}
+.adm-tabela td small{display:block; white-space:nowrap; color:var(--ink-soft); font-size:.78rem; margin-top:2px;}
+.adm-tabela tr:last-child td{border-bottom:none;}
+.adm-vazio{padding:24px; text-align:center;}
+.adm-vazio[hidden]{display:none;}
+
+.adm-status{
+  display:inline-block; padding:3px 9px; border-radius:20px; white-space:nowrap;
+  font-family:var(--font-mono); font-size:.68rem; letter-spacing:.03em;
+}
+.st-pendente{background:rgba(201,162,39,.18); color:#7A5A1E;}
+.st-aguardando_assinatura{background:rgba(70,110,170,.15); color:#2E4E7E;}
+.st-confirmado{background:rgba(60,130,80,.16); color:#2D6A3E;}
+.st-cancelado{background:rgba(107,36,48,.12); color:var(--wine);}
+.st-concluido{background:rgba(90,85,72,.14); color:var(--ink-soft);}
+body.dark-mode .st-pendente{color:var(--gold-light);}
+body.dark-mode .st-aguardando_assinatura{color:#9DB8E3;}
+body.dark-mode .st-confirmado{color:#8FD0A0;}
+body.dark-mode .st-cancelado{color:#E08A96;}
+
+@media (max-width:700px){
+  .adm-card{padding:22px 18px;}
+  .adm-row3{grid-template-columns:1fr !important;}
+  .adm-topo h1{font-size:1.8rem;}
+  .adm-user{display:none;}
+}

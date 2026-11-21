@@ -65,9 +65,28 @@ def enviar_codigo(email, nome, codigo):
 
 
 def fazer_login(cliente: dict) -> None:
-    session.clear()
+    # Só mexe na chave do cliente: um administrador logado no mesmo
+    # navegador (área /admin) continua logado.
     session.permanent = True
     session["cliente_id"] = cliente["id"]
+
+
+def verificar_conflitos_cadastro(cur, email: str, cpf: str) -> None:
+    """Impede contas duplicadas.
+
+    Clientes cadastrados pela equipe (reserva por rede social/presencial)
+    não têm senha: se a pessoa criar conta com o MESMO CPF, o cadastro é
+    completado em vez de duplicado (ver confirmar_cadastro).
+    """
+    cur.execute("SELECT id, email, cpf, senha_hash FROM cliente WHERE email = %s OR cpf = %s", (email, cpf))
+    for r in cur.fetchall():
+        if r["senha_hash"]:                              # já tem conta no site
+            if r["email"] == email:
+                raise ErroValidacao("Já existe uma conta com este e-mail.", "email", 409)
+            raise ErroValidacao("Já existe uma conta com este CPF.", "cpf", 409)
+        if r["cpf"] != cpf and r["email"] == email:      # e-mail de outro cliente da equipe
+            raise ErroValidacao("Este e-mail já está cadastrado para outra pessoa. "
+                                "Fale com a Radiance pelo WhatsApp.", "email", 409)
 
 
 # Limite simples de tentativas de login (por IP + e-mail), em memória.
@@ -91,12 +110,7 @@ def cadastro():
     dados = validar_cadastro(corpo_json())
     db = get_db()
     with db.cursor() as cur:
-        cur.execute("SELECT email, cpf FROM cliente WHERE email = %s OR cpf = %s",
-                    (dados["email"], dados["cpf"]))
-        for existente in cur.fetchall():
-            if existente["email"] == dados["email"]:
-                raise ErroValidacao("Já existe uma conta com este e-mail.", "email", 409)
-            raise ErroValidacao("Já existe uma conta com este CPF.", "cpf", 409)
+        verificar_conflitos_cadastro(cur, dados["email"], dados["cpf"])
 
         # A senha é guardada já em hash, mesmo no cadastro pendente.
         pendente = {k: v for k, v in dados.items() if k != "senha"}
@@ -145,23 +159,42 @@ def confirmar_cadastro():
             raise ErroValidacao("Código incorreto. Confira e tente de novo.", "codigo")
 
         dados = json.loads(p["dados"]) if isinstance(p["dados"], str) else p["dados"]
-        cur.execute("SELECT id FROM cliente WHERE email = %s OR cpf = %s", (email, dados["cpf"]))
-        if cur.fetchone():
+        try:
+            verificar_conflitos_cadastro(cur, email, dados["cpf"])
+        except ErroValidacao as e:
+            # alguém criou a conta enquanto este código esperava
             cur.execute("DELETE FROM cadastro_pendente WHERE id = %s", (p["id"],))
             db.commit()
-            raise ErroValidacao("Já existe uma conta com este e-mail ou CPF. Faça login.", status=409)
+            raise ErroValidacao(e.mensagem + " Faça login.", e.campo, 409)
 
-        cur.execute(
-            """INSERT INTO cliente (nome, cpf, data_nascimento, endereco_cep, endereco_rua,
-                 endereco_numero, endereco_bairro, endereco_cidade, endereco_uf,
-                 telefone, email, email_verificado_em, senha_hash)
-               VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,NOW(),%s)""",
-            (dados["nome"], dados["cpf"], dados["data_nascimento"], dados["endereco_cep"],
-             dados["endereco_rua"], dados["endereco_numero"], dados["endereco_bairro"],
-             dados["endereco_cidade"], dados["endereco_uf"], dados["telefone"], email,
-             dados["senha_hash"]),
-        )
-        novo_id = cur.lastrowid
+        valores = (dados["nome"], dados["data_nascimento"], dados["endereco_cep"],
+                   dados["endereco_rua"], dados["endereco_numero"], dados["endereco_bairro"],
+                   dados["endereco_cidade"], dados["endereco_uf"], dados["telefone"], email,
+                   dados["senha_hash"])
+        cur.execute("SELECT id FROM cliente WHERE cpf = %s AND senha_hash IS NULL", (dados["cpf"],))
+        da_equipe = cur.fetchone()
+        if da_equipe:
+            # Cliente já cadastrado pela equipe: completa o cadastro com os
+            # dados informados no site e cria o acesso. As reservas feitas
+            # antes (por rede social ou presencialmente) ficam na conta.
+            cur.execute(
+                """UPDATE cliente SET nome = %s, data_nascimento = %s, endereco_cep = %s,
+                     endereco_rua = %s, endereco_numero = %s, endereco_bairro = %s,
+                     endereco_cidade = %s, endereco_uf = %s, telefone = %s, email = %s,
+                     email_verificado_em = NOW(), senha_hash = %s
+                   WHERE id = %s""",
+                (*valores, da_equipe["id"]),
+            )
+            novo_id = da_equipe["id"]
+        else:
+            cur.execute(
+                """INSERT INTO cliente (nome, data_nascimento, endereco_cep, endereco_rua,
+                     endereco_numero, endereco_bairro, endereco_cidade, endereco_uf,
+                     telefone, email, senha_hash, cpf, email_verificado_em)
+                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,NOW())""",
+                (*valores, dados["cpf"]),
+            )
+            novo_id = cur.lastrowid
         cur.execute("DELETE FROM cadastro_pendente WHERE id = %s", (p["id"],))
         cur.execute("SELECT * FROM cliente WHERE id = %s", (novo_id,))
         cliente = cur.fetchone()
@@ -212,7 +245,8 @@ def login():
         cur.execute("SELECT * FROM cliente WHERE email = %s", (email,))
         cliente = cur.fetchone()
     # Mensagem genérica de propósito: não revela se o e-mail tem conta.
-    if not cliente or not check_password_hash(cliente["senha_hash"], senha):
+    # (cliente cadastrado pela equipe não tem senha e não faz login)
+    if not cliente or not cliente["senha_hash"] or not check_password_hash(cliente["senha_hash"], senha):
         _tentativas_login[chave].append(time.time())
         raise ErroValidacao("E-mail ou senha incorretos.", status=401)
 
@@ -223,7 +257,7 @@ def login():
 
 @bp.post("/logout")
 def logout():
-    session.clear()
+    session.pop("cliente_id", None)
     return jsonify({"ok": True})
 
 
@@ -234,8 +268,9 @@ def cliente_logado():
     with get_db().cursor() as cur:
         cur.execute("SELECT * FROM cliente WHERE id = %s", (cid,))
         c = cur.fetchone()
-    if not c:
-        session.clear()
+    if not c or not c["senha_hash"]:
+        session.pop("cliente_id", None)
+        return None
     return c
 
 

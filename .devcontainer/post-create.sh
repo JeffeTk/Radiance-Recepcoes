@@ -3,6 +3,10 @@
 set -euo pipefail
 cd "$(dirname "$0")/../backend"
 
+echo "==> Instalando o cliente do MySQL (para consultas e migrações no terminal)..."
+(sudo apt-get update -qq && sudo apt-get install -y -qq default-mysql-client >/dev/null) \
+  || echo "    Não foi possível instalar agora; dá para instalar depois (veja docs/INSTALACAO.md)."
+
 echo "==> Instalando as dependências do back-end..."
 pip install --user --disable-pip-version-check -q -r requirements.txt
 
@@ -40,3 +44,6 @@ else
   echo "==> backend/.env já existe — mantido como está."
 fi
 echo "==> Pronto."
+echo ""
+echo "Para usar a área administrativa (/admin), crie o administrador:"
+echo "    cd backend && python criar_admin.py"

@@ -20,15 +20,37 @@ USE radiance;
 
 
 -- ---------------------------------------------------------------------
+-- ADMINISTRADOR
+-- Quem acessa a área administrativa (/admin). Criado pelo comando
+-- "python criar_admin.py" no back-end — não existe conta padrão.
+-- ---------------------------------------------------------------------
+CREATE TABLE administrador (
+  id            INT UNSIGNED  NOT NULL AUTO_INCREMENT,
+  nome          VARCHAR(120)  NOT NULL,
+  email         VARCHAR(150)  NOT NULL,
+  senha_hash    VARCHAR(255)  NOT NULL,
+  ativo         BOOLEAN       NOT NULL DEFAULT TRUE,
+  data_criacao  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+  CONSTRAINT pk_administrador PRIMARY KEY (id),
+  CONSTRAINT uq_administrador_email UNIQUE (email)
+);
+
+
+-- ---------------------------------------------------------------------
 -- CLIENTE
 -- Preenchido pelo cadastro do site. CPF e telefone são guardados só
 -- com dígitos (o back-end remove a máscara antes de inserir).
 -- A senha NUNCA é guardada: só o hash (bcrypt / argon2).
 -- A regra "18 anos ou mais" fica no back-end, porque CHECK no MySQL
 -- não aceita CURRENT_DATE.
--- A conta só é criada depois que o e-mail é confirmado com o código de
--- 6 números (ver cadastro_pendente), por isso email_verificado_em é
--- obrigatório.
+-- Dois tipos de cliente:
+--  • com conta no site: tem e-mail confirmado (código de 6 números, ver
+--    cadastro_pendente) e senha — pode fazer login;
+--  • cadastrado pela equipe na área administrativa (reserva feita por
+--    redes sociais ou presencialmente): sem senha, e-mail opcional.
+--    Se depois a pessoa criar conta no site com o mesmo CPF, o cadastro
+--    é completado e as reservas antigas passam a aparecer para ela.
 -- ---------------------------------------------------------------------
 CREATE TABLE cliente (
   id               INT UNSIGNED  NOT NULL AUTO_INCREMENT,
@@ -42,9 +64,9 @@ CREATE TABLE cliente (
   endereco_cidade  VARCHAR(80)   NOT NULL,
   endereco_uf      CHAR(2)       NOT NULL,
   telefone         VARCHAR(11)   NOT NULL,
-  email            VARCHAR(150)  NOT NULL,
-  email_verificado_em DATETIME   NOT NULL,
-  senha_hash       VARCHAR(255)  NOT NULL,
+  email            VARCHAR(150)  NULL,       -- opcional para quem não tem conta
+  email_verificado_em DATETIME   NULL,
+  senha_hash       VARCHAR(255)  NULL,       -- NULL = sem conta no site
   data_criacao     DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
   CONSTRAINT pk_cliente PRIMARY KEY (id),
@@ -53,6 +75,10 @@ CREATE TABLE cliente (
   CONSTRAINT ck_cliente_cpf      CHECK (cpf REGEXP '^[0-9]{11}$'),
   CONSTRAINT ck_cliente_telefone CHECK (telefone REGEXP '^[0-9]{10,11}$'),
   CONSTRAINT ck_cliente_cep CHECK (endereco_cep REGEXP '^[0-9]{8}$'),
+  -- quem tem senha (conta no site) precisa ter e-mail confirmado
+  CONSTRAINT ck_cliente_conta CHECK (
+    senha_hash IS NULL OR (email IS NOT NULL AND email_verificado_em IS NOT NULL)
+  ),
   CONSTRAINT ck_cliente_uf CHECK (endereco_uf IN (
     'AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA',
     'PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'))
@@ -110,10 +136,15 @@ CREATE TABLE aluguel (
   status              ENUM('pendente', 'aguardando_assinatura', 'confirmado',
                            'cancelado', 'concluido') NOT NULL DEFAULT 'pendente',
   valor_total         DECIMAL(10,2)     NULL,   -- definido pelo back-end/equipe
+  origem              ENUM('site', 'presencial', 'whatsapp', 'instagram',
+                           'facebook', 'telefone', 'outro') NOT NULL DEFAULT 'site',
+  registrado_por      INT UNSIGNED      NULL,   -- administrador que lançou (NULL = pelo site)
 
   CONSTRAINT pk_aluguel PRIMARY KEY (id),
   CONSTRAINT fk_aluguel_cliente FOREIGN KEY (id_cliente)
     REFERENCES cliente (id) ON UPDATE RESTRICT ON DELETE RESTRICT,
+  CONSTRAINT fk_aluguel_administrador FOREIGN KEY (registrado_por)
+    REFERENCES administrador (id) ON UPDATE RESTRICT ON DELETE RESTRICT,
 
   CONSTRAINT ck_aluguel_datas      CHECK (data_final_evento >= data_inicio_evento),
   CONSTRAINT ck_aluguel_convidados CHECK (num_convidados BETWEEN 1 AND 100),

@@ -8,13 +8,14 @@ import os
 import pymysql
 from flask import Flask, abort, jsonify, request, send_from_directory
 
+import admin
 import auth
 import db
 import reservas
 from config import Config
 from validacao import ErroValidacao
 
-PAGINAS = {"index.html", "reserva.html"}
+PAGINAS = {"index.html", "reserva.html", "admin.html"}
 
 
 def create_app(config=Config):
@@ -26,6 +27,7 @@ def create_app(config=Config):
     db.init_app(app)
     app.register_blueprint(auth.bp)
     app.register_blueprint(reservas.bp)
+    app.register_blueprint(admin.bp)
 
     # -------- proteção contra CSRF --------
     # A API só aceita POST com JSON. Um site malicioso não consegue mandar
@@ -33,7 +35,8 @@ def create_app(config=Config):
     # SameSite=Lax — juntos, isso impede ações em nome do cliente logado.
     @app.before_request
     def exigir_json():
-        if request.path.startswith("/api/") and request.method == "POST" and request.path != "/api/logout":
+        if (request.path.startswith("/api/") and request.method == "POST"
+                and request.path not in ("/api/logout", "/api/admin/logout")):
             if not request.is_json:
                 return jsonify({"mensagem": "Envie os dados em JSON."}), 415
 
@@ -67,6 +70,10 @@ def create_app(config=Config):
     def inicio():
         return send_from_directory(site, "index.html")
 
+    @app.get("/admin")
+    def area_admin():
+        return send_from_directory(site, "admin.html")
+
     @app.get("/<pagina>")
     def pagina(pagina):
         if pagina not in PAGINAS:
@@ -83,6 +90,9 @@ def create_app(config=Config):
         resp.headers.setdefault("Referrer-Policy", "same-origin")
         if request.path.startswith("/api/"):
             resp.headers["Cache-Control"] = "no-store"
+        if request.path in ("/admin", "/admin.html") or request.path.startswith("/api/admin"):
+            resp.headers["X-Robots-Tag"] = "noindex, nofollow"   # fora do Google
+            resp.headers["X-Frame-Options"] = "DENY"
         return resp
 
     return app

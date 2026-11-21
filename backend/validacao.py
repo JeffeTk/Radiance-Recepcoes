@@ -5,6 +5,7 @@ qualquer pessoa pode chamar a API direto, sem passar pelo site.
 """
 import re
 from datetime import date
+from decimal import Decimal, InvalidOperation
 
 UFS = {
     "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA",
@@ -75,8 +76,25 @@ def senha_forte(s: str) -> bool:
     return len(s) >= 8 and re.search(r"[A-Za-z]", s) and re.search(r"\d", s)
 
 
-def validar_cadastro(d: dict) -> dict:
-    """Valida o JSON do cadastro e devolve os dados limpos."""
+def validar_endereco(end) -> dict:
+    if not isinstance(end, dict):
+        raise ErroValidacao("Endereço inválido.", "rua")
+    cep = so_digitos(end.get("cep"))
+    if len(cep) != 8:
+        raise ErroValidacao("Informe o CEP com 8 números.", "cep")
+    rua = texto(end, "rua", minimo=3, maximo=150, msg="Informe a rua.")
+    numero = texto(end, "numero", maximo=10, msg="Informe o número (ou S/N).")
+    bairro = texto(end, "bairro", minimo=2, maximo=80, msg="Informe o bairro.")
+    cidade = texto(end, "cidade", minimo=2, maximo=80, msg="Informe a cidade.")
+    uf = str(end.get("uf") or "").strip().upper()
+    if uf not in UFS:
+        raise ErroValidacao("Selecione a UF.", "uf")
+    return {"endereco_cep": cep, "endereco_rua": rua, "endereco_numero": numero,
+            "endereco_bairro": bairro, "endereco_cidade": cidade, "endereco_uf": uf}
+
+
+def validar_pessoa(d: dict) -> dict:
+    """Nome, CPF, nascimento (18+) e telefone — comuns ao site e ao admin."""
     nome = texto(d, "nome", maximo=120, msg="Informe nome e sobrenome.")
     if len(nome.split()) < 2:
         raise ErroValidacao("Informe nome e sobrenome.", "nome")
@@ -95,6 +113,12 @@ def validar_cadastro(d: dict) -> dict:
     telefone = so_digitos(d.get("telefone"))
     if not telefone_valido(telefone):
         raise ErroValidacao("Informe um número válido com DDD.", "telefone")
+    return {"nome": nome, "cpf": cpf, "data_nascimento": nasc.isoformat(), "telefone": telefone}
+
+
+def validar_cadastro(d: dict) -> dict:
+    """Valida o JSON do cadastro feito pelo site e devolve os dados limpos."""
+    pessoa = validar_pessoa(d)
 
     email = str(d.get("email") or "").strip().lower()
     if not EMAIL_RE.match(email) or len(email) > 150:
@@ -104,26 +128,7 @@ def validar_cadastro(d: dict) -> dict:
     if not senha_forte(senha) or len(senha) > 200:
         raise ErroValidacao("Use no mínimo 8 caracteres, com letras e números.", "senha")
 
-    end = d.get("endereco") or {}
-    if not isinstance(end, dict):
-        raise ErroValidacao("Endereço inválido.", "rua")
-    cep = so_digitos(end.get("cep"))
-    if len(cep) != 8:
-        raise ErroValidacao("Informe o CEP com 8 números.", "cep")
-    rua = texto(end, "rua", minimo=3, maximo=150, msg="Informe a rua.")
-    numero = texto(end, "numero", maximo=10, msg="Informe o número (ou S/N).")
-    bairro = texto(end, "bairro", minimo=2, maximo=80, msg="Informe o bairro.")
-    cidade = texto(end, "cidade", minimo=2, maximo=80, msg="Informe a cidade.")
-    uf = str(end.get("uf") or "").strip().upper()
-    if uf not in UFS:
-        raise ErroValidacao("Selecione a UF.", "uf")
-
-    return {
-        "nome": nome, "cpf": cpf, "data_nascimento": nasc.isoformat(), "telefone": telefone,
-        "email": email, "senha": senha,
-        "endereco_cep": cep, "endereco_rua": rua, "endereco_numero": numero,
-        "endereco_bairro": bairro, "endereco_cidade": cidade, "endereco_uf": uf,
-    }
+    return {**pessoa, "email": email, "senha": senha, **validar_endereco(d.get("endereco") or {})}
 
 
 def validar_reserva(d: dict, convidados_max: int) -> dict:
@@ -165,3 +170,75 @@ def validar_reserva(d: dict, convidados_max: int) -> dict:
         "tipo_evento": tipo, "data_inicio_evento": inicio, "data_final_evento": final,
         "turno": turno, "num_convidados": convidados, "whatsapp": whatsapp, "mensagem": mensagem,
     }
+
+
+# ------------------------------------------------------------------ área administrativa
+ORIGENS_ADMIN = {"presencial", "whatsapp", "instagram", "facebook", "telefone", "outro"}
+STATUS_ADMIN = {"pendente", "aguardando_assinatura", "confirmado"}
+FORMAS_PAGAMENTO = {"pix", "cartao_credito", "cartao_debito", "boleto", "dinheiro"}
+
+
+def dinheiro(v, campo, obrigatorio=True):
+    """Aceita 3500, 3500.5, "3500,50" ou "3.500,50" e devolve Decimal com 2 casas."""
+    if v in (None, ""):
+        if obrigatorio:
+            raise ErroValidacao("Informe o valor.", campo)
+        return None
+    txt = str(v).strip().replace("R$", "").replace(" ", "")
+    if "," in txt:                       # formato brasileiro
+        txt = txt.replace(".", "").replace(",", ".")
+    try:
+        valor = Decimal(txt).quantize(Decimal("0.01"))
+    except (InvalidOperation, ValueError):
+        raise ErroValidacao("Valor inválido.", campo)
+    if valor <= 0 or valor > Decimal("99999999.99"):
+        raise ErroValidacao("Valor inválido.", campo)
+    return valor
+
+
+def validar_cliente_admin(d: dict) -> dict:
+    """Cliente cadastrado pela equipe: sem senha, e-mail opcional."""
+    dados = validar_pessoa(d)
+    email = str(d.get("email") or "").strip().lower()
+    if email and (not EMAIL_RE.match(email) or len(email) > 150):
+        raise ErroValidacao("E-mail inválido (ou deixe em branco).", "email")
+    return {**dados, "email": email or None, **validar_endereco(d.get("endereco") or {})}
+
+
+def validar_reserva_admin(d: dict, convidados_max: int) -> dict:
+    """Reserva lançada pela equipe (rede social, telefone, presencial)."""
+    r = validar_reserva(d, convidados_max)
+
+    origem = str(d.get("origem") or "")
+    if origem not in ORIGENS_ADMIN:
+        raise ErroValidacao("Selecione por onde a reserva foi feita.", "origem")
+
+    status = str(d.get("status") or "pendente")
+    if status not in STATUS_ADMIN:
+        raise ErroValidacao("Status inválido.", "status")
+
+    valor_total = dinheiro(d.get("valor_total"), "valor_total", obrigatorio=(status != "pendente"))
+
+    sinal = None
+    s = d.get("sinal")
+    if s:
+        if not isinstance(s, dict):
+            raise ErroValidacao("Dados do sinal inválidos.", "sinal_valor")
+        valor = dinheiro(s.get("valor"), "sinal_valor")
+        if valor_total is not None and valor > valor_total:
+            raise ErroValidacao("O sinal não pode ser maior que o valor total.", "sinal_valor")
+        forma = str(s.get("forma") or "")
+        if forma not in FORMAS_PAGAMENTO:
+            raise ErroValidacao("Selecione a forma de pagamento do sinal.", "sinal_forma")
+        data_pg = data_iso(s.get("data") or date.today().isoformat(), "sinal_data", "Data do pagamento inválida.")
+        if data_pg > date.today():
+            raise ErroValidacao("A data do pagamento não pode ser no futuro.", "sinal_data")
+        sinal = {"valor": valor, "forma": forma, "data": data_pg}
+
+    observacao = str(d.get("observacao") or "").strip()
+    if len(observacao) > 2000:
+        raise ErroValidacao("As observações podem ter no máximo 2000 caracteres.", "observacao")
+
+    r.update({"origem": origem, "status": status, "valor_total": valor_total,
+              "sinal": sinal, "observacao": observacao})
+    return r
