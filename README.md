@@ -101,7 +101,16 @@ A equipe tem uma **área administrativa** para registrar as reservas fechadas fo
 2. Espere alguns minutos na primeira vez. O ambiente cria o banco, instala as dependências e inicia o site sozinho.
 3. Abra a aba **PORTAS**, passe o mouse em **Site Radiance (5000)** e clique no globo.
 
-Os códigos de verificação de e-mail aparecem no terminal enquanto o SMTP não estiver configurado. Para a área administrativa, crie o administrador em um terminal novo com `cd backend && python criar_admin.py` e acesse `/admin`.
+Os códigos de verificação de e-mail aparecem no terminal enquanto o SMTP não estiver configurado.
+
+**Contas de teste** (criadas automaticamente no Codespace):
+
+| Conta | E-mail | Senha |
+|---|---|---|
+| Área administrativa (`/admin`) | `adm@gmail.com` | `se12345678` |
+| Cliente do site | `teste@gmail.com` | `te12345678` |
+
+> Elas vêm de `banco/dados_teste.sql`, que serve só para desenvolvimento. No site no ar, crie o administrador com `python criar_admin.py` (veja o [Guia de instalação](docs/INSTALACAO.md#contas-de-teste)).
 
 ### Opção 2: no seu computador
 
@@ -119,8 +128,9 @@ pip install -r requirements.txt
 cp .env.example .env               # Windows: copy .env.example .env
 #    → preencha SECRET_KEY e os dados do banco no .env
 
-# 3. Administrador da área /admin
-python criar_admin.py
+# 3. Contas de teste (adm@gmail.com / se12345678 e teste@gmail.com / te12345678)
+mysql -u radiance -p radiance < ../banco/dados_teste.sql
+#    ou crie o seu administrador: python criar_admin.py
 
 # 4. Rodar
 python app.py                      # site: http://localhost:5000  ·  admin: http://localhost:5000/admin
@@ -147,6 +157,7 @@ Abra `site/index.html` direto no navegador. O site entra no **modo de teste**: n
 │   └── email_envio.py  envio do código por SMTP
 ├── banco/
 │   ├── radiance_banco.sql
+│   ├── dados_teste.sql contas de teste (só desenvolvimento)
 │   └── migracoes/      atualizações para bancos de versões anteriores
 └── docs/               guia de instalação e prints das telas
 ```

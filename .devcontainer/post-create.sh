@@ -45,5 +45,6 @@ else
 fi
 echo "==> Pronto."
 echo ""
-echo "Para usar a área administrativa (/admin), crie o administrador:"
-echo "    cd backend && python criar_admin.py"
+echo "Contas de teste (criadas por banco/dados_teste.sql):"
+echo "    Área administrativa (/admin): adm@gmail.com   / se12345678"
+echo "    Cliente do site:              teste@gmail.com / te12345678"

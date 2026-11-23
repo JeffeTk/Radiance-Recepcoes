@@ -19,6 +19,7 @@ radiance/
 │   └── .env.example      modelo de configuração
 └── banco/
     ├── radiance_banco.sql   cria o banco (tabelas, regras e trigger)
+    ├── dados_teste.sql      contas de teste (só desenvolvimento)
     └── migracoes/           atualizações para bancos criados com versões anteriores
 ```
 
@@ -60,7 +61,7 @@ Abra o Codespace em **Code → Codespaces** ou em [github.com/codespaces](https:
 ### Coisas úteis
 
 - **Reiniciar o servidor:** no terminal, aperte `Ctrl+C` e rode `bash .devcontainer/iniciar.sh`.
-- **Criar o administrador da área `/admin`:** em um terminal novo, `cd backend && python criar_admin.py`. Veja a seção [Área administrativa](#área-administrativa).
+- **Entrar na área `/admin`:** use a conta de teste `adm@gmail.com` / `se12345678`, ou crie a sua em um terminal novo com `cd backend && python criar_admin.py`. Veja a seção [Área administrativa](#área-administrativa).
 - **Mexer no banco** (por exemplo, aprovar uma reserva):
   ```bash
   mysql -h db -u radiance -pradiance-dev radiance
@@ -172,9 +173,33 @@ Outros provedores, como Brevo, Mailgun, Zoho ou o e-mail da hospedagem, funciona
 
 Em **`/admin`** (por exemplo, `http://localhost:5000/admin`), a equipe registra reservas fechadas fora do site, como pelo WhatsApp, pelas redes sociais, por telefone ou presencialmente. Lá também dá para ver todas as reservas. O endereço não aparece em nenhum link do site, a página não entra no Google e todas as ações exigem login de administrador.
 
+### Contas de teste
+
+O arquivo `banco/dados_teste.sql` cria duas contas para testar:
+
+| Conta | E-mail | Senha |
+|---|---|---|
+| Administrador (`/admin`) | `adm@gmail.com` | `se12345678` |
+| Cliente do site | `teste@gmail.com` | `te12345678` |
+
+- **Codespace novo:** as contas já são criadas sozinhas.
+- **Codespace que já existia:** rode em um terminal novo (se ainda não rodou a migração da seção abaixo, rode ela antes):
+  ```bash
+  mysql -h db -u radiance -pradiance-dev radiance < banco/dados_teste.sql
+  ```
+- **No seu computador:** `mysql -u radiance -p radiance < banco/dados_teste.sql`.
+
+Rodar de novo não duplica nada, só volta as senhas para as da tabela.
+
+> ⚠ **Não use `dados_teste.sql` no site no ar.** As senhas estão escritas aqui, e qualquer pessoa que leia o repositório conseguiria entrar como administrador. Em produção, crie o administrador com `python criar_admin.py`. Se as contas de teste já estiverem no banco, apague com:
+> ```sql
+> DELETE FROM administrador WHERE email = 'adm@gmail.com';
+> DELETE FROM cliente WHERE email = 'teste@gmail.com';
+> ```
+
 ### Criar o administrador
 
-Não existe conta padrão. Crie a sua pelo terminal, dentro da pasta `backend`:
+Para ter o seu próprio administrador, e no site no ar, onde a conta de teste não deve existir: Crie a sua pelo terminal, dentro da pasta `backend`:
 
 ```bash
 python criar_admin.py

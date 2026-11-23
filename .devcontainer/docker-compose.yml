@@ -23,6 +23,7 @@ services:
       # Executados em ordem, só na PRIMEIRA vez que o banco é criado:
       - ../banco/radiance_banco.sql:/docker-entrypoint-initdb.d/01-radiance_banco.sql:ro
       - ./mysql-init/02-usuario.sql:/docker-entrypoint-initdb.d/02-usuario.sql:ro
+      - ../banco/dados_teste.sql:/docker-entrypoint-initdb.d/03-dados_teste.sql:ro   # contas de teste (só desenvolvimento)
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot-dev-codespaces"]
       interval: 5s

@@ -41,13 +41,17 @@ def pedir_senha():
 
 def main():
     c = Config
+    print("== Criar administrador da Radiance ==", flush=True)
+    print(f"Conectando ao banco ({c.DB_HOST})...", flush=True)
     try:
         db = pymysql.connect(host=c.DB_HOST, port=c.DB_PORT, user=c.DB_USER, password=c.DB_PASSWORD,
-                             database=c.DB_NAME, charset="utf8mb4", cursorclass=pymysql.cursors.DictCursor)
+                             database=c.DB_NAME, charset="utf8mb4", cursorclass=pymysql.cursors.DictCursor,
+                             connect_timeout=8)
     except pymysql.err.OperationalError as e:
-        sys.exit(f"Não foi possível conectar ao banco ({e.args[-1]}). Confira o backend/.env.")
-
-    print("== Criar administrador da Radiance ==")
+        sys.exit(f"Não foi possível conectar ao banco: {e.args[-1]}\n"
+                 "Confira se o banco está rodando e os dados DB_* do backend/.env.\n"
+                 "No Codespaces: Ctrl+Shift+P → Codespaces: Rebuild Container.")
+    print("Conectado. Responda as perguntas abaixo.\n", flush=True)
     email = perguntar("E-mail: ", lambda v: EMAIL_RE.match(v.lower()), "E-mail inválido.").lower()
 
     with db.cursor() as cur:
@@ -78,4 +82,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except (KeyboardInterrupt, EOFError):
+        print("\nCancelado. Nada foi alterado.")
