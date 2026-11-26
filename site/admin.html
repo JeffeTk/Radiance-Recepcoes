@@ -328,6 +328,7 @@
 
     <!-- ---------- LISTA ---------- -->
     <div id="abaLista" class="adm-aba-conteudo" hidden>
+      <p class="adm-muted adm-intro">Clique numa reserva para ver os detalhes, mudar o status, editar, registrar pagamentos ou cancelar.</p>
       <div class="adm-filtros">
         <input type="search" id="filtroTexto" placeholder="Filtrar por cliente ou telefone">
         <select id="filtroStatus">
@@ -355,6 +356,199 @@
     </div>
   </section>
 </main>
+
+<!-- ================= DETALHES DA RESERVA ================= -->
+<div class="adm-overlay" id="detalhe" hidden>
+  <div class="adm-modal" role="dialog" aria-modal="true" aria-labelledby="dTitulo">
+    <div class="adm-modal-topo">
+      <div>
+        <span class="eyebrow">Reserva</span>
+        <h2 id="dTitulo">—</h2>
+        <span class="adm-modal-sub" id="dSub"></span>
+      </div>
+      <span class="adm-status" id="dStatus"></span>
+      <button type="button" class="adm-fechar" id="dFechar" aria-label="Fechar">&times;</button>
+    </div>
+    <div class="form-msg" id="dMsg" role="status"></div>
+
+    <div class="adm-modal-grid">
+      <div>
+        <!-- CLIENTE -->
+        <section class="adm-sec">
+          <h3>Cliente</h3>
+          <dl class="adm-dl" id="dCliente"></dl>
+        </section>
+
+        <!-- EVENTO (editar) -->
+        <section class="adm-sec">
+          <h3>Evento e status</h3>
+          <form id="dForm" novalidate>
+            <div class="field-row">
+              <div class="field">
+                <label for="d_status">Status</label>
+                <select id="d_status">
+                  <option value="pendente">Pendente</option>
+                  <option value="aguardando_assinatura">Aguardando assinatura</option>
+                  <option value="confirmado">Confirmado</option>
+                  <option value="concluido">Concluído (evento já aconteceu)</option>
+                  <option value="cancelado" disabled>Cancelado</option>
+                </select>
+                <span class="field-error"></span>
+              </div>
+              <div class="field">
+                <label for="d_valor">Valor total (R$)</label>
+                <input type="text" id="d_valor" inputmode="decimal" placeholder="Ex.: 3.500,00">
+                <span class="field-error"></span>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="d_tipo">Tipo de evento</label>
+                <select id="d_tipo">
+                  <option>Casamento</option><option>Debutante (15 anos)</option><option>Aniversário</option>
+                  <option>Corporativo</option><option>Outro</option>
+                </select>
+                <span class="field-error"></span>
+              </div>
+              <div class="field">
+                <label for="d_origem">Reserva feita por</label>
+                <select id="d_origem">
+                  <option value="site" disabled>Site</option>
+                  <option value="presencial">Presencial</option><option value="whatsapp">WhatsApp</option>
+                  <option value="instagram">Instagram</option><option value="facebook">Facebook</option>
+                  <option value="telefone">Telefone</option><option value="outro">Outro</option>
+                </select>
+                <span class="field-error"></span>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="d_duracao">Duração</label>
+                <select id="d_duracao">
+                  <option value="unica">Um dia</option>
+                  <option value="multipla">Mais de um dia</option>
+                </select>
+              </div>
+              <div class="field" id="d_campoTurno">
+                <label for="d_turno">Turno</label>
+                <select id="d_turno">
+                  <option value="" disabled>Selecione</option>
+                  <option value="Diurno">Diurno (8h às 17h)</option>
+                  <option value="Noturno">Noturno (18h à 1h)</option>
+                </select>
+                <span class="field-error"></span>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="d_inicio" id="d_lblInicio">Data do evento</label>
+                <input type="date" id="d_inicio">
+                <span class="field-error"></span>
+              </div>
+              <div class="field" id="d_campoFinal">
+                <label for="d_final">Último dia</label>
+                <input type="date" id="d_final">
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="d_convidados">Convidados</label>
+                <input type="number" id="d_convidados" min="1" max="100">
+                <span class="field-error"></span>
+              </div>
+              <div class="field adm-salvar">
+                <button type="submit" class="btn btn-primary">Salvar alterações</button>
+              </div>
+            </div>
+          </form>
+        </section>
+      </div>
+
+      <div>
+        <!-- PAGAMENTOS -->
+        <section class="adm-sec">
+          <h3>Pagamentos</h3>
+          <div class="adm-resumo">
+            <div><span>Total</span><strong id="dTotal">—</strong></div>
+            <div><span>Pago</span><strong id="dPago">—</strong></div>
+            <div><span>Falta</span><strong id="dFalta">—</strong></div>
+          </div>
+          <ul class="adm-pagamentos" id="dPagamentos"></ul>
+          <form id="pgForm" novalidate>
+            <p class="field-group">Registrar pagamento</p>
+            <div class="field-row">
+              <div class="field">
+                <label for="p_tipo">Tipo</label>
+                <select id="p_tipo">
+                  <option value="sinal">Sinal</option>
+                  <option value="restante">Restante</option>
+                </select>
+                <span class="field-error"></span>
+              </div>
+              <div class="field">
+                <label for="p_valor">Valor (R$)</label>
+                <input type="text" id="p_valor" inputmode="decimal">
+                <button type="button" class="adm-link adm-30" id="pgFalta">Usar o valor que falta</button>
+                <span class="field-error"></span>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="p_forma">Forma</label>
+                <select id="p_forma">
+                  <option value="" selected disabled>Selecione</option>
+                  <option value="pix">Pix</option><option value="dinheiro">Dinheiro</option>
+                  <option value="cartao_credito">Cartão de crédito</option><option value="cartao_debito">Cartão de débito</option>
+                  <option value="boleto">Boleto</option>
+                </select>
+                <span class="field-error"></span>
+              </div>
+              <div class="field">
+                <label for="p_data">Data</label>
+                <input type="date" id="p_data">
+                <span class="field-error"></span>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-gold adm-full">Registrar pagamento</button>
+          </form>
+          <p class="adm-muted" id="pgBloqueado" hidden></p>
+        </section>
+
+        <!-- OBSERVAÇÕES -->
+        <section class="adm-sec">
+          <h3>Observações</h3>
+          <ul class="adm-obs" id="dObs"></ul>
+          <form id="obsForm" novalidate>
+            <div class="field">
+              <label for="o_texto" class="sr-only">Nova observação</label>
+              <textarea id="o_texto" rows="2" maxlength="2000" placeholder="Escreva uma observação para a equipe…"></textarea>
+              <span class="field-error"></span>
+            </div>
+            <button type="submit" class="btn btn-ghost">Adicionar observação</button>
+          </form>
+        </section>
+
+        <!-- CANCELAR -->
+        <section class="adm-sec adm-perigo" id="dCancelarSec">
+          <h3>Cancelar reserva</h3>
+          <p class="adm-muted">A data volta a ficar livre no calendário. Pagamentos já recebidos continuam registrados; a devolução, se houver, segue o contrato.</p>
+          <button type="button" class="btn adm-btn-perigo" id="cAbrir">Cancelar reserva</button>
+          <form id="cForm" novalidate hidden>
+            <div class="field">
+              <label for="c_motivo">Motivo do cancelamento</label>
+              <textarea id="c_motivo" rows="2" maxlength="1000" placeholder="Ex.: cliente desistiu, mudou de cidade…"></textarea>
+              <span class="field-error"></span>
+            </div>
+            <div class="adm-botoes">
+              <button type="submit" class="btn adm-btn-perigo">Confirmar cancelamento</button>
+              <button type="button" class="btn btn-ghost" id="cVoltar">Voltar</button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script src="assets/admin.js" defer></script>
 </body>

@@ -26,7 +26,7 @@ A Radiance é uma casa de festas para casamentos, debutantes, aniversários e ev
 2. crie uma conta, com confirmação do e-mail por código;
 3. envie o pedido de reserva, que entra no banco como **pendente** para a equipe confirmar pelo WhatsApp.
 
-A equipe tem uma **área administrativa** para registrar as reservas fechadas fora do site (WhatsApp, redes sociais, telefone ou presencial) e acompanhar todas as reservas.
+A equipe tem uma **área administrativa** para registrar as reservas fechadas fora do site (WhatsApp, redes sociais, telefone ou presencial) e gerenciar todas as reservas: status, edição, pagamentos e cancelamento.
 
 ## Funcionalidades
 
@@ -59,6 +59,11 @@ A equipe tem uma **área administrativa** para registrar as reservas fechadas fo
 - Registro manual de reservas, com o canal de origem, o cliente (já cadastrado, ou novo com CEP automático), o evento, o status, o valor e o sinal pago.
 - Aviso na hora se a data já estiver ocupada.
 - Lista de todas as reservas, do site e manuais, com filtros.
+- Detalhes de cada reserva:
+  - **mudar o status** e **editar** o evento e o valor;
+  - **registrar pagamentos** (sinal e restante), com o resumo de total, pago e quanto falta, e estorno de lançamentos errados;
+  - **observações** da equipe;
+  - **cancelar** com motivo, o que libera a data no calendário.
 - Clientes cadastrados pela equipe ficam sem conta. Se depois criarem conta no site com o mesmo CPF, o cadastro é completado e as reservas antigas aparecem para eles.
 
 **Segurança no back-end**
@@ -82,6 +87,8 @@ A equipe tem uma **área administrativa** para registrar as reservas fechadas fo
 | Área administrativa: nova reserva | Área administrativa: reservas registradas |
 |---|---|
 | <img src="docs/screenshots/admin-nova-reserva.png" alt="Formulário para registrar uma reserva feita fora do site"> | <img src="docs/screenshots/admin-lista.png" alt="Lista de reservas com status, valores e origem"> |
+
+<p align="center"><b>Detalhes da reserva:</b> status, edição, pagamentos, observações e cancelamento<br><img src="docs/screenshots/admin-detalhes.png" alt="Janela com os detalhes da reserva, pagamentos e observações" width="860"></p>
 
 ## Tecnologias
 
@@ -181,6 +188,11 @@ Abra `site/index.html` direto no navegador. O site entra no **modo de teste**: n
 | `GET` | `/api/admin/clientes?q=` | Busca clientes por nome, CPF ou telefone |
 | `GET` | `/api/admin/reservas` | Lista as reservas (admin) |
 | `POST` | `/api/admin/reservas` | Registra uma reserva feita fora do site (admin) |
+| `GET` · `PATCH` | `/api/admin/reservas/<id>` | Detalhes da reserva · editar evento, valor e status (admin) |
+| `POST` | `/api/admin/reservas/<id>/cancelar` | Cancela com motivo e libera a data (admin) |
+| `POST` | `/api/admin/reservas/<id>/pagamentos` | Registra sinal ou restante (admin) |
+| `POST` | `/api/admin/reservas/<id>/pagamentos/<pid>/estornar` | Estorna um pagamento (admin) |
+| `POST` | `/api/admin/reservas/<id>/observacoes` | Adiciona uma observação (admin) |
 
 Erros vêm como `{ "mensagem": "...", "campo": "..." }`. Detalhes no [Guia de instalação](docs/INSTALACAO.md#api).
 
@@ -203,7 +215,8 @@ A view `vw_datas_ocupadas` alimenta o calendário.
 ## Próximos passos
 
 - [x] Área administrativa com registro manual de reservas
-- [ ] Na área administrativa: mudar status, editar e cancelar reservas, registrar o pagamento do restante
+- [x] Na área administrativa: mudar status, editar e cancelar reservas, registrar pagamentos
+- [ ] Na área administrativa: editar os dados do cliente
 - [ ] Geração do contrato em PDF e envio do arquivo assinado pelo gov.br
 - [ ] Recuperação de senha
 - [ ] Área do cliente com o histórico de reservas

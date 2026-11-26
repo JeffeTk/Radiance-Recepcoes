@@ -50,6 +50,10 @@ def create_app(config=Config):
 
     @app.errorhandler(pymysql.err.OperationalError)
     def erro_banco(e):
+        # 1644 = mensagem do trigger "uma reserva por data" (o banco recusou
+        # duas reservas na mesma data, mesmo que cheguem ao mesmo tempo)
+        if e.args and e.args[0] == 1644:
+            return jsonify({"mensagem": e.args[1], "campo": "data"}), 409
         app.logger.exception("Erro de conexão com o banco")
         return jsonify({"mensagem": "Serviço indisponível no momento. Tente novamente em instantes."}), 503
 

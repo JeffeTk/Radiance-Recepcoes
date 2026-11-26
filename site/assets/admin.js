@@ -600,6 +600,10 @@ function desenharLista() {
     (!q || r.cliente.toLowerCase().includes(q) || (qDig.length >= 3 && r.telefone.includes(qDig))));
   filtradas.forEach(r => {
     const tr = document.createElement('tr');
+    tr.tabIndex = 0;
+    tr.title = 'Ver detalhes da reserva nº ' + r.id;
+    tr.addEventListener('click', () => abrirDetalhe(r.id));
+    tr.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirDetalhe(r.id); } });
     const data = r.data_inicio_evento === r.data_final_evento
       ? dataBR(r.data_inicio_evento) : `${dataBR(r.data_inicio_evento)} a ${dataBR(r.data_final_evento)}`;
     tr.append(
@@ -626,6 +630,256 @@ function desenharLista() {
 $('filtroTexto').addEventListener('input', desenharLista);
 $('filtroStatus').addEventListener('change', desenharLista);
 $('atualizarLista').addEventListener('click', carregarLista);
+
+// =====================================================================
+// DETALHES DA RESERVA: status, edição, pagamentos, observações, cancelar
+// =====================================================================
+const ROTULO_FORMA = { pix: 'Pix', dinheiro: 'Dinheiro', cartao_credito: 'Cartão de crédito', cartao_debito: 'Cartão de débito', boleto: 'Boleto' };
+const CAMPOS_DETALHE = {
+  status: 'd_status', valor_total: 'd_valor', tipo: 'd_tipo', origem: 'd_origem', turno: 'd_turno',
+  data: 'd_inicio', convidados: 'd_convidados',
+  pg_tipo: 'p_tipo', pg_valor: 'p_valor', pg_forma: 'p_forma', pg_data: 'p_data',
+  obs_texto: 'o_texto', motivo: 'c_motivo',
+};
+const detalhe = $('detalhe');
+let atual = null;            // reserva aberta
+let ultimoFoco = null;
+
+function limparErrosDetalhe() {
+  detalhe.querySelectorAll('.invalid').forEach(el => el.classList.remove('invalid'));
+  detalhe.querySelectorAll('.field-error').forEach(e => { e.textContent = ''; e.classList.remove('show'); });
+}
+function msgDetalhe(texto, erro) {
+  const m = $('dMsg');
+  m.textContent = texto;
+  m.classList.toggle('erro', !!erro);
+  m.classList.add('show');
+}
+function erroDetalhe(err) {
+  if (tratarSessao(err)) { fecharDetalhe(); return; }
+  const id = CAMPOS_DETALHE[err.campo];
+  if (id) { setErr($(id), err.message); $(id).focus(); }
+  msgDetalhe(err.message, true);
+}
+
+async function abrirDetalhe(id) {
+  ultimoFoco = document.activeElement;
+  try {
+    const r = await api('GET', '/api/admin/reservas/' + id);
+    $('dMsg').classList.remove('show');
+    preencherDetalhe(r);
+    detalhe.hidden = false;
+    document.body.classList.add('adm-travado');
+    $('dFechar').focus();
+  } catch (err) {
+    if (!tratarSessao(err)) alert(err.message);
+  }
+}
+function fecharDetalhe() {
+  detalhe.hidden = true;
+  document.body.classList.remove('adm-travado');
+  if (ultimoFoco) ultimoFoco.focus();
+}
+$('dFechar').addEventListener('click', fecharDetalhe);
+detalhe.addEventListener('mousedown', e => { if (e.target === detalhe) fecharDetalhe(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !detalhe.hidden) fecharDetalhe(); });
+
+function linhaDL(dl, rotulo, valor) {
+  const dt = document.createElement('dt'); dt.textContent = rotulo;
+  const dd = document.createElement('dd');
+  if (valor instanceof Node) dd.append(valor); else dd.textContent = valor;
+  dl.append(dt, dd);
+}
+
+function preencherDetalhe(r) {
+  atual = r;
+  limparErrosDetalhe();
+  $('dTitulo').textContent = 'Nº ' + r.id;
+  $('dSub').textContent = `Pedida em ${r.data_solicitacao.split(' ')[0].split('-').reverse().join('/')}` +
+    ` · ${ROTULO_ORIGEM[r.origem]}` + (r.registrado_por ? ` · registrada por ${r.registrado_por}` : '');
+  const st = $('dStatus');
+  st.className = 'adm-status st-' + r.status;
+  st.textContent = ROTULO_STATUS[r.status];
+
+  // cliente
+  const c = r.cliente, dl = $('dCliente');
+  dl.replaceChildren();
+  const nome = document.createElement('span');
+  nome.textContent = c.nome;
+  if (c.tem_conta) { const t = document.createElement('span'); t.className = 'adm-tag'; t.textContent = 'conta no site'; nome.append(t); }
+  linhaDL(dl, 'Nome', nome);
+  const zap = document.createElement('a');
+  zap.href = 'https://wa.me/55' + c.telefone; zap.target = '_blank'; zap.rel = 'noopener';
+  zap.textContent = maskPhone(c.telefone);
+  linhaDL(dl, 'WhatsApp', zap);
+  linhaDL(dl, 'CPF', maskCPF(c.cpf));
+  if (c.email) linhaDL(dl, 'E-mail', c.email);
+  linhaDL(dl, 'Nascimento', c.data_nascimento.split('-').reverse().join('/'));
+  linhaDL(dl, 'Endereço', c.endereco);
+
+  // evento / status
+  const cancelada = r.status === 'cancelado';
+  $('d_status').querySelector('option[value=cancelado]').hidden = !cancelada;
+  $('d_status').value = r.status;
+  $('d_valor').value = r.valor_total ? brl(r.valor_total) : '';
+  $('d_tipo').value = r.tipo_evento;
+  $('d_origem').value = r.origem;
+  $('d_origem').disabled = r.origem === 'site';       // pedido do site continua "Site"
+  const multi = r.data_final_evento !== r.data_inicio_evento;
+  $('d_duracao').value = multi ? 'multipla' : 'unica';
+  $('d_inicio').value = r.data_inicio_evento;
+  $('d_final').value = multi ? r.data_final_evento : '';
+  $('d_turno').value = r.turno || '';
+  $('d_convidados').value = r.num_convidados;
+  atualizarDuracaoDetalhe();
+
+  // pagamentos
+  const total = r.valor_total ? Number(r.valor_total) : null;
+  const falta = r.falta_pagar !== null ? Number(r.falta_pagar) : null;
+  $('dTotal').textContent = total !== null ? 'R$ ' + brl(total) : '—';
+  $('dPago').textContent = 'R$ ' + brl(r.total_pago);
+  $('dFalta').textContent = falta !== null ? (falta <= 0 ? 'Quitado' : 'R$ ' + brl(falta)) : '—';
+  $('dFalta').classList.toggle('quitado', falta !== null && falta <= 0);
+
+  const ul = $('dPagamentos');
+  ul.replaceChildren();
+  if (!r.pagamentos.length) {
+    const li = document.createElement('li'); li.className = 'vazio'; li.textContent = 'Nenhum pagamento registrado.'; ul.append(li);
+  }
+  r.pagamentos.forEach(p => {
+    const li = document.createElement('li');
+    if (p.status === 'estornado') li.classList.add('estornado');
+    const info = document.createElement('div');
+    info.append(document.createTextNode(`${p.tipo === 'sinal' ? 'Sinal' : 'Restante'} · R$ ${brl(p.valor)}`));
+    const sub = document.createElement('small');
+    sub.textContent = `${ROTULO_FORMA[p.forma] || p.forma}${p.data ? ' · ' + p.data.split('-').reverse().join('/') : ''}` +
+      (p.status === 'estornado' ? ' · estornado' : p.status === 'pendente' ? ' · pendente' : '');
+    info.append(sub);
+    li.append(info);
+    if (p.status === 'pago') {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'adm-link'; b.textContent = 'Estornar';
+      b.addEventListener('click', () => estornar(p));
+      li.append(b);
+    }
+    ul.append(li);
+  });
+
+  const temSinal = r.pagamentos.some(p => p.tipo === 'sinal' && p.status === 'pago');
+  const quitado = falta !== null && falta <= 0;
+  const bloqueio = cancelada ? 'Reserva cancelada não recebe pagamentos.'
+    : quitado ? 'Esta reserva já está totalmente paga.' : '';
+  $('pgForm').hidden = !!bloqueio;
+  $('pgBloqueado').hidden = !bloqueio;
+  $('pgBloqueado').textContent = bloqueio;
+  $('pgForm').reset();
+  $('p_tipo').value = temSinal ? 'restante' : 'sinal';
+  $('p_tipo').querySelector('option[value=sinal]').disabled = temSinal;
+  $('p_data').value = hojeISO();
+  $('p_data').max = hojeISO();
+
+  // observações
+  const ob = $('dObs');
+  ob.replaceChildren();
+  if (!r.observacoes.length) {
+    const li = document.createElement('li'); li.className = 'vazio'; li.textContent = 'Nenhuma observação.'; ob.append(li);
+  }
+  r.observacoes.forEach(o => {
+    const li = document.createElement('li');
+    const meta = document.createElement('small');
+    const [d, h] = o.data.split(' ');
+    meta.textContent = `${d.split('-').reverse().join('/')} ${h} · ${o.autor === 'equipe' ? 'Equipe' : 'Cliente'}`;
+    li.append(meta, document.createTextNode(o.texto));
+    ob.append(li);
+  });
+  ob.scrollTop = ob.scrollHeight;
+  $('obsForm').reset();
+
+  // cancelar
+  $('dCancelarSec').hidden = cancelada || r.status === 'concluido';
+  $('cForm').hidden = true;
+  $('cAbrir').hidden = false;
+}
+
+function atualizarDuracaoDetalhe() {
+  const multi = $('d_duracao').value === 'multipla';
+  $('d_campoTurno').hidden = multi;
+  $('d_campoFinal').hidden = !multi;
+  $('d_lblInicio').textContent = multi ? 'Primeiro dia' : 'Data do evento';
+}
+$('d_duracao').addEventListener('change', atualizarDuracaoDetalhe);
+
+async function acaoDetalhe(btn, fn, okMsg) {
+  limparErrosDetalhe();
+  $('dMsg').classList.remove('show');
+  if (btn) btn.disabled = true;
+  try {
+    const r = await fn();
+    preencherDetalhe(r);
+    msgDetalhe(okMsg);
+    carregarLista();
+    carregarOcupadas();
+  } catch (err) {
+    erroDetalhe(err);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+// salvar edição (dados do evento + status + valor)
+$('dForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const multi = $('d_duracao').value === 'multipla';
+  if (multi && (!$('d_final').value || $('d_final').value <= $('d_inicio').value)) {
+    setErr($('d_inicio'), 'Para mais de um dia, o último dia deve ser depois do primeiro.');
+    return;
+  }
+  const corpo = {
+    status: $('d_status').value,
+    valor_total: $('d_valor').value.trim(),
+    tipo_evento: $('d_tipo').value,
+    data_inicio_evento: $('d_inicio').value,
+    data_final_evento: multi ? $('d_final').value : $('d_inicio').value,
+    turno: multi ? null : $('d_turno').value,
+    num_convidados: Number($('d_convidados').value),
+  };
+  if (atual.origem !== 'site') corpo.origem = $('d_origem').value;
+  acaoDetalhe(e.submitter, () => api('PATCH', '/api/admin/reservas/' + atual.id, corpo), 'Alterações salvas.');
+});
+
+// pagamentos
+$('pgFalta').addEventListener('click', () => {
+  if (atual.falta_pagar === null) { setErr($('p_valor'), 'Defina o valor total da reserva primeiro.'); return; }
+  $('p_valor').value = brl(atual.falta_pagar);
+  setErr($('p_valor'), '');
+});
+$('pgForm').addEventListener('submit', e => {
+  e.preventDefault();
+  if (!$('p_valor').value.trim()) { setErr($('p_valor'), 'Informe o valor.'); $('p_valor').focus(); return; }
+  if (!$('p_forma').value) { setErr($('p_forma'), 'Selecione.'); $('p_forma').focus(); return; }
+  const corpo = { tipo: $('p_tipo').value, valor: $('p_valor').value.trim(), forma: $('p_forma').value, data: $('p_data').value };
+  acaoDetalhe(e.submitter, () => api('POST', `/api/admin/reservas/${atual.id}/pagamentos`, corpo), 'Pagamento registrado.');
+});
+function estornar(p) {
+  if (!confirm(`Estornar o pagamento de R$ ${brl(p.valor)} (${p.tipo})? Ele deixa de contar como pago.`)) return;
+  acaoDetalhe(null, () => api('POST', `/api/admin/reservas/${atual.id}/pagamentos/${p.id}/estornar`, {}), 'Pagamento estornado.');
+}
+
+// observações
+$('obsForm').addEventListener('submit', e => {
+  e.preventDefault();
+  if (!$('o_texto').value.trim()) { setErr($('o_texto'), 'Escreva a observação.'); return; }
+  acaoDetalhe(e.submitter, () => api('POST', `/api/admin/reservas/${atual.id}/observacoes`, { texto: $('o_texto').value.trim() }), 'Observação adicionada.');
+});
+
+// cancelar
+$('cAbrir').addEventListener('click', () => { $('cAbrir').hidden = true; $('cForm').hidden = false; $('c_motivo').focus(); });
+$('cVoltar').addEventListener('click', () => { $('cForm').hidden = true; $('cAbrir').hidden = false; setErr($('c_motivo'), ''); });
+$('cForm').addEventListener('submit', e => {
+  e.preventDefault();
+  if ($('c_motivo').value.trim().length < 3) { setErr($('c_motivo'), 'Informe o motivo do cancelamento.'); $('c_motivo').focus(); return; }
+  acaoDetalhe(e.submitter, () => api('POST', `/api/admin/reservas/${atual.id}/cancelar`, { motivo: $('c_motivo').value.trim() }), 'Reserva cancelada. A data foi liberada no calendário.');
+});
 
 // ---------- começo ----------
 atualizarDuracao();

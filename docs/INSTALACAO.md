@@ -171,7 +171,7 @@ Outros provedores, como Brevo, Mailgun, Zoho ou o e-mail da hospedagem, funciona
 
 ## Área administrativa
 
-Em **`/admin`** (por exemplo, `http://localhost:5000/admin`), a equipe registra reservas fechadas fora do site, como pelo WhatsApp, pelas redes sociais, por telefone ou presencialmente. Lá também dá para ver todas as reservas. O endereço não aparece em nenhum link do site, a página não entra no Google e todas as ações exigem login de administrador.
+Em **`/admin`** (por exemplo, `http://localhost:5000/admin`), a equipe registra reservas fechadas fora do site, como pelo WhatsApp, pelas redes sociais, por telefone ou presencialmente. Lá também dá para ver e gerenciar todas as reservas: mudar o status, editar, registrar pagamentos e cancelar. O endereço não aparece em nenhum link do site, a página não entra no Google e todas as ações exigem login de administrador.
 
 ### Contas de teste
 
@@ -223,6 +223,14 @@ No Codespaces, abra um terminal novo (**+**) e rode `cd backend && python criar_
   - *Pendente* não bloqueia o calendário, e o valor pode ficar em branco.
   - *Aguardando assinatura* e *Confirmado* bloqueiam a data no calendário do site e exigem o valor total.
 - **Ver as reservas registradas:** tanto as do site quanto as manuais, com filtro por status e por cliente.
+- **Clicar numa reserva** abre os detalhes, onde dá para:
+  - **mudar o status:** pendente, aguardando assinatura, confirmado ou concluído. "Concluído" só depois do último dia do evento. Cada mudança fica registrada nas observações;
+  - **editar** o tipo de evento, a origem, as datas (um ou vários dias), o turno, os convidados e o valor total;
+  - **registrar pagamentos:** o sinal (uma vez) e o restante (de uma vez ou em parcelas). O resumo mostra o total, o pago e quanto falta; não é possível pagar mais que o total. Um pagamento lançado errado pode ser **estornado**;
+  - **adicionar observações** para a equipe;
+  - **cancelar a reserva:** pede o motivo, que fica nas observações, e libera a data no calendário. Pagamentos já recebidos continuam registrados. Uma reserva cancelada pode ser reaberta como pendente.
+
+As mesmas regras do banco valem aqui: status que bloqueiam a data exigem o valor total e não aceitam uma data já ocupada por outra reserva.
 
 Se um cliente cadastrado pela equipe criar conta no site depois **com o mesmo CPF**, o cadastro dele é completado (sem duplicar), e as reservas feitas antes aparecem na conta.
 
@@ -267,6 +275,12 @@ Todas as rotas respondem JSON. Os erros vêm como `{ "mensagem": "...", "campo":
 | GET | `/api/admin/me` | Administrador logado, ou 401. |
 | GET | `/api/admin/clientes?q=` | Busca clientes por nome, CPF ou telefone (até 15). |
 | GET | `/api/admin/reservas` | Reservas com cliente, valor, total pago, origem e quem registrou. |
+| GET | `/api/admin/reservas/<id>` | Detalhes: cliente, evento, pagamentos (total, pago, falta) e observações. |
+| PATCH | `/api/admin/reservas/<id>` | Edita dados do evento, valor e status. Só os campos enviados mudam. 409 se a nova data estiver ocupada. |
+| POST | `/api/admin/reservas/<id>/cancelar` | `{ motivo }` → cancela e libera a data. |
+| POST | `/api/admin/reservas/<id>/pagamentos` | `{ tipo: sinal\|restante, valor, forma, data }`. Não deixa passar do total nem registrar dois sinais. |
+| POST | `/api/admin/reservas/<id>/pagamentos/<pid>/estornar` | Marca o pagamento como estornado (corpo `{}`). |
+| POST | `/api/admin/reservas/<id>/observacoes` | `{ texto }` → observação da equipe. |
 | POST | `/api/admin/reservas` | Registra uma reserva feita fora do site: `cliente_id` (existente) **ou** `cliente` (novo), mais `origem`, dados do evento, `status`, `valor_total`, `sinal` e `observacao`. Responde 409 se a data estiver ocupada. |
 
 Todas as rotas `/api/admin/*`, menos o login, respondem **401** para quem não é administrador, inclusive clientes logados.
@@ -279,9 +293,6 @@ Todas as rotas `/api/admin/*`, menos o login, respondem **401** para quem não �
 
 ## O que ainda não existe
 
-- **Na área administrativa ainda falta:** mudar o status, editar ou cancelar uma reserva, registrar o pagamento do restante e validar contratos. Por enquanto, isso é feito direto no banco, por exemplo:
-  ```sql
-  UPDATE aluguel SET status = 'aguardando_assinatura', valor_total = 3500.00 WHERE id = 1;
-  ```
+- **Na área administrativa ainda falta:** editar os dados do cliente e validar contratos.
 - **Recuperação de senha** ("esqueci minha senha").
 - **Contrato:** geração do PDF preenchido, envio do arquivo assinado e conferência pelo hash (as tabelas já estão prontas).
